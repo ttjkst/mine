@@ -126,7 +126,7 @@
         <optional>true</optional>
     </dependency>
 	
-	<dependency>
+	<!-- <dependency>
 		<groupId>org.slf4j</groupId>
 		<artifactId>jcl-over-slf4j</artifactId>
 		<version>1.5.8</version>
@@ -145,7 +145,7 @@
 		<groupId>log4j</groupId>
 		<artifactId>log4j</artifactId>
 		<version>1.2.14</version>
-	</dependency>
+	</dependency> -->
 	<!-- Here is servlet-api -->
 	<dependency>
 		<groupId>javax.servlet</groupId>

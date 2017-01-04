@@ -2,12 +2,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ImportResource;
+import org.springframework.context.annotation.PropertySource;
 
 @Configuration
 @EnableAutoConfiguration
-@ComponentScan
-@ImportResource(locations={"classpath:applicationContext.xml,application.yml"})
+@ComponentScan(basePackages={"com.ttjkst"})
+@PropertySource({"classpath:application.yaml"})
 public class Application {
  
 	

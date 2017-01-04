@@ -117,9 +117,4 @@ public class Users {
 		}
 		return super.equals(obj);
 	}
-
-	public static void main(String[] args) {
-		Users u = new Users();
-		System.out.println(u.equals(null));
-	}
 }

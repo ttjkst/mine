@@ -4,11 +4,9 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
 
 import com.ttjkst.bean.Kinds;
 
-@Repository
 public interface KindDAO extends CrudRepository<Kinds, Long>{
 	
 	@Query("select count(k) from Kinds k where k.kName like ?1 and k.aboutwhat.name like ?2")

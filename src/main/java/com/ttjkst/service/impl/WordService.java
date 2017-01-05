@@ -271,34 +271,4 @@ public class WordService implements IWordsService{
 		return null;
 	}
 	
-	
-	//getter and setter
-	public WordDAO getDao() {
-		return dao;
-	}
-
-	public void setDao(WordDAO dao) {
-		this.dao = dao;
-	}
-
-	public KindDAO getkDao() {
-		return kDao;
-	}
-
-	public void setkDao(KindDAO kDao) {
-		this.kDao = kDao;
-	}
-
-	public ABDAO getAbDao() {
-		return abDao;
-	}
-
-	public void setAbDao(ABDAO abDao) {
-		this.abDao = abDao;
-	}
-
-	
-	
-	
-	
 }

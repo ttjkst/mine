@@ -19,8 +19,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.junit.Ignore;
-import org.springframework.stereotype.Repository;
-@Repository
 @Entity
 @Table(name="words")
 public class Words implements Serializable {

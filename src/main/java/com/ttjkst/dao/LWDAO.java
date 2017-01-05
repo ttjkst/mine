@@ -4,10 +4,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
 
 import com.ttjkst.bean.LeaveWords;
-@Repository
 public interface LWDAO extends JpaSpecificationExecutor<LeaveWords>,JpaRepository<LeaveWords, Long>{
 	
 	@Query("select count(l) from LeaveWords l where l.leaveFor.wId = ?1 and l.hasRead = false")

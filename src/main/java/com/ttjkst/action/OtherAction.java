@@ -17,10 +17,16 @@ import com.ttjkst.bean.Users;
 import com.ttjkst.service.IUserService;
 @Controller
 @SessionAttributes("user")
-public class OtherAction{
+public class OtherAction { 
 	@Autowired
 	public IUserService userService;
 
+	@RequestMapping(value = "/home")
+	public String toHome(){
+		return "home";
+	}
+	
+	
 	@ModelAttribute("user")
 	public Users initUser(){
 		System.out.println("init user");
@@ -44,5 +50,6 @@ public class OtherAction{
 		model.addAttribute("user", new Users());
 		return true;
 	}
+	
 	
 }

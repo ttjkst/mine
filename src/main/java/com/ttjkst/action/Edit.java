@@ -187,6 +187,7 @@ public class Edit implements ServletContextAware{
 	//inject ServletContext 
 	//init webRoot
 	public void setServletContext(ServletContext servletContext) {
+		System.out.println(servletContext.getRealPath("/"));
 	 System.setProperty("LocalWebRoot", servletContext.getRealPath("/"));	
 	}	
 	

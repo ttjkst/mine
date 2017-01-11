@@ -49,22 +49,22 @@ public class WordService implements IWordsService{
 	
 	private String separator = "/";
 	
-	private static String localWebRoot = null;
+	private static String filePath = null;
 
 	public void detele(Long id) throws ServiceException {
 		Words w = this.getItbyId(id);
-		if(localWebRoot==null){
-		localWebRoot = System.getProperty("LocalWebRoot");
+		if(filePath==null){
+		filePath = System.getProperty("filePath");
 		}
 		boolean deletePath = false;
 		boolean deleteIntor = false;
-		if(localWebRoot==null||localWebRoot.isEmpty()){
-				throw new ServiceException("the loacalWebRoot is not defined");
+		if(filePath==null||filePath.isEmpty()){
+				throw new ServiceException("the filePath is not defined");
 		
 		}
 		try {
-		  deleteIntor =	FileUtils.deleteQuietly(new File(localWebRoot+w.getIntroductionPath()));
-		  deletePath  =	FileUtils.deleteQuietly(new File(localWebRoot+w.getwPath()));
+		  deleteIntor =	FileUtils.deleteQuietly(new File(filePath+w.getIntroductionPath()));
+		  deletePath  =	FileUtils.deleteQuietly(new File(filePath+w.getwPath()));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}finally {
@@ -142,10 +142,10 @@ public class WordService implements IWordsService{
 
 	public Words update(Words word, InputStream srcWord, InputStream srcIntor)
 			throws ServiceException {
-		if(localWebRoot==null){
-			localWebRoot = System.getProperty("LocalWebRoot");
+		if(filePath==null){
+			filePath = System.getProperty("LocalWebRoot");
 		}
-		if(localWebRoot==null||localWebRoot.isEmpty()){
+		if(filePath==null||filePath.isEmpty()){
 			throw new ServiceException("the loacalWebRoot is not defined");
 		}
 		try {
@@ -167,16 +167,16 @@ public class WordService implements IWordsService{
 			word.setwPath(srcEnitity.getwPath());
 			word  = this.dao.save(word);
 			if(srcWord!=null){
-				FileUtils.copyInputStreamToFile(srcWord, new File(localWebRoot+separator+word.getwPath()));
+				FileUtils.copyInputStreamToFile(srcWord, new File(filePath+separator+word.getwPath()));
 			}
 			if(srcIntor!=null){
-				FileUtils.copyInputStreamToFile(srcIntor,new File(localWebRoot+separator+word.getIntroductionPath()));
+				FileUtils.copyInputStreamToFile(srcIntor,new File(filePath+separator+word.getIntroductionPath()));
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
-		return null;
+		return word;
 	}
 
 	public Page<Words> findItByReadTimes(final String aboutWhatName, int size) {
@@ -233,10 +233,10 @@ public class WordService implements IWordsService{
 	}
 	public Words saveit(Words word, InputStream srcWord, InputStream srcIntor) throws ServiceException {
 		//init
-		if(localWebRoot==null){
-			localWebRoot = System.getProperty("LocalWebRoot");
+		if(filePath==null){
+			filePath = System.getProperty("LocalWebRoot");
 		}
-		if(localWebRoot==null||localWebRoot.isEmpty()){
+		if(filePath==null||filePath.isEmpty()){
 			throw new ServiceException("the loacalWebRoot is not defined");
 		}
 		
@@ -259,8 +259,8 @@ public class WordService implements IWordsService{
 		// where is the intor located in
 		String intorFilePath = getIntorByMd5(word);
 		 try {
-		    FileUtils.copyInputStreamToFile(srcWord, new File(localWebRoot+separator+pathFilePath));
-			FileUtils.copyInputStreamToFile(srcIntor,new File(localWebRoot+separator+intorFilePath));
+		    FileUtils.copyInputStreamToFile(srcWord, new File(filePath+separator+pathFilePath));
+			FileUtils.copyInputStreamToFile(srcIntor,new File(filePath+separator+intorFilePath));
 			
 			word.setIntroductionPath(intorFilePath);
 			word.setwPath(pathFilePath);

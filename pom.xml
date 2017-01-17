@@ -16,11 +16,7 @@
     <java.version>1.8</java.version>
    </properties>
   <dependencies>
-	<dependency>
-		<groupId>junit</groupId>
-		<artifactId>junit</artifactId>
-		<version>4.11</version>
-	</dependency>
+	
 	<!--  Here is sturts2-->
 	<!--<dependency>
 		<groupId>org.apache.struts</groupId>
@@ -115,6 +111,10 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-web</artifactId>
 	</dependency>
+		<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-test</artifactId>
+	</dependency>
 	<dependency>
             <groupId>org.apache.tomcat.embed</groupId>
             <artifactId>tomcat-embed-jasper</artifactId>
@@ -175,8 +175,38 @@
     <artifactId>transport</artifactId>
     <version>5.1.1</version>
 </dependency>
- 
- 
+<!-- https://mvnrepository.com/artifact/org.elasticsearch.plugin/transport-netty4-client -->
+<dependency>
+    <groupId>org.elasticsearch.plugin</groupId>
+    <artifactId>transport-netty4-client</artifactId>
+    <version>5.1.1</version>
+</dependency>
+<!-- https://mvnrepository.com/artifact/org.elasticsearch.plugin/percolator-client -->
+<dependency>
+    <groupId>org.elasticsearch</groupId>
+    <artifactId>elasticsearch</artifactId>
+    <version>5.1.1</version>
+</dependency>
+<dependency>
+    <groupId>org.apache.logging.log4j</groupId>
+    <artifactId>log4j-api</artifactId>
+    <version>2.7</version>
+</dependency>
+<dependency>
+    <groupId>org.apache.logging.log4j</groupId>
+    <artifactId>log4j-core</artifactId>
+    <version>2.7</version>
+</dependency>
+
+  	<dependency>
+  		<groupId>org.springframework.boot</groupId>
+  		<artifactId>spring-boot-starter-test</artifactId>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.springframework.boot</groupId>
+  		<artifactId>spring-boot-configuration-processor</artifactId>
+  		<optional>true</optional>
+  	</dependency>
   </dependencies>
   <build>
      <plugins>

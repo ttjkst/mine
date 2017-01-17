@@ -1,6 +1,5 @@
 package com.ttjkst.fileSystem;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,33 +11,56 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
+import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.stereotype.Component;
 
+import com.ttjkst.fileSystem.exception.EsRuntimeException;
+@Component
+@EnableConfigurationProperties(FileSytemProperties.class)
 public class SimpleFileSystem {
-		private String esUrl = "";
-		private String path = "";
+		private FileSytemProperties properties;
 		private TransportClient client = null;
 		private InetAddress address = null;
 		private static String separator = "/";
+		
+		
+		
+		public SimpleFileSystem(FileSytemProperties properties) {
+			super();
+			this.properties = properties;
+		}
+
+		private boolean inited = false;
 		public void init(){
-			String urls[] = esUrl.split(":");
-			
+			if(inited){
+				return;
+			}
+			String urls[] = properties.getEsUrl().split(":");
 			try {
 				address = InetAddress.getByName(urls[0]);
 				client = extracted()
 				        .addTransportAddress(new InetSocketTransportAddress(address, Integer.parseInt(urls[1])));
+				inited = true;
 			} catch (UnknownHostException e) {
 				e.printStackTrace();
 			}
 		}
 		private PreBuiltTransportClient extracted() {
-			return new PreBuiltTransportClient(Settings.EMPTY);
+			Settings settings = Settings.builder().
+					put("cluster.name", properties.getEsClusterName()).put("client.transport.sniff", false).
+					put("client.transport.ignore_cluster_name",true).build();		      
+			return new PreBuiltTransportClient(settings);
 		}
 		public void persist(File file,String id){
+			init();
 			try {
 				FileInputStream fileInputStream = new FileInputStream(file);
 				this.persist(fileInputStream, id);
@@ -48,17 +70,44 @@ public class SimpleFileSystem {
 			
 		}
 		public void persist(FileInputStream fileInputStream,String id){
-			IndexRequest indexRequest = new IndexRequest();
+			init();
+			if(properties.isEsIgnoreIndex()){
+				createIndex();
+			}
 			Map<String, String> source = new HashMap<>();
 			
 			source.put("id",id);
-			source.put("content", file2String(fileInputStream,id,path));
-			indexRequest.source(source);
-			client.index(indexRequest);
+			source.put("content", file2Str(fileInputStream,id,properties.getPath()));
+			System.out.println(properties.toString());
+			client.prepareIndex(properties.getEsIndex(),
+					properties.getEsType()).setSource(source).get();
+			
+			client.close();
+			
 			
 		}
+		private boolean isIndexExists(){
+			IndicesExistsRequest request = new IndicesExistsRequest(properties.getEsIndex());
+			IndicesExistsResponse response = null;
+			try {
+				response = client.admin().indices().exists(request).actionGet();
+			} catch (Exception e) {
+				e.printStackTrace();
+				return false;
+			}
+			return response.isExists();
+		}
+		private void createIndex(){
+			if(!isIndexExists()){
+				CreateIndexRequest createIndexRequest = new CreateIndexRequest(properties.getEsIndex());
+				CreateIndexResponse response = client.admin().indices().create(createIndexRequest).actionGet();
+				if(!response.isAcknowledged()){
+					throw  new EsRuntimeException("create "+properties.getEsIndex()+" error");
+				}
+			}
+		}
 		
-		private static String file2String(FileInputStream fileInputStream,String id,String path){
+		private static String file2Str(FileInputStream fileInputStream,String id,String path){
 			ByteArrayOutputStream arrayOutputStream = null;
 			File destDir = new File(path);
 			File dest = null;

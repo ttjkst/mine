@@ -1,6 +1,8 @@
 package com.ttjkst.fileSystem;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.List;
 
 import org.junit.Test;
@@ -31,13 +33,22 @@ public class SimpleFileSystemTest {
 //			fileSystem.persist(file, "5");
 //			fileSystem.close();
 //		}
-		@Test
-		public void search(){
-			List<String> search = fileSystem.search("arcu");
-			search.forEach(x->System.out.println(x));
-		}
+//		@Test
+//		public void search(){
+//			List<String> search = fileSystem.search("arcu");
+//			search.forEach(x->System.out.println(x));
+//		}
 //		@Test
 //		public void delete(){
 //			fileSystem.delete("HELLOW");
 //		}
+		@Test
+		public void update(){
+			File file = new File("C:\\Users\\ttjkst\\Desktop\\test\\1.txt");
+			try {
+				fileSystem.update(new FileInputStream(file), "2");
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+		}
 }

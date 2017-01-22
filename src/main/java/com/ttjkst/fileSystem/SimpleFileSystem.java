@@ -14,15 +14,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
@@ -30,7 +30,6 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.reindex.BulkIndexByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryAction;
 import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.profile.ProfileShardResult;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -113,8 +112,30 @@ public class SimpleFileSystem implements Closeable {
 			return delId;
 		}
 		
-		public void update(FileInputStream fileInputStream,String id){
-			
+		public void update(InputStream inputStream,String id){
+			init();
+			//先是获取文档中的id属性（非doc中的_id,这里的id是自己定义的id）
+			SearchResponse response = client.prepareSearch(properties.getEsIndex()).
+					setTypes(properties.getEsType()).setSearchType(SearchType.QUERY_THEN_FETCH).
+					setPostFilter(QueryBuilders.matchQuery("id", id)).addStoredField("id").get();
+			List<String> result = new ArrayList<>();
+			response.getHits().forEach(x->{
+				result.add( x.getId());
+			});
+			String docId = result.get(0);
+			//然后通过id属性定位文档，对其进行更新，相应的本地存储也会更新
+			UpdateRequest request = new UpdateRequest(properties.getEsIndex(),properties.getEsType(),docId);
+			Map< String, String> source = new HashMap<>();
+			source.put("id", id);
+			source.put("content", stream2Str(inputStream, id, properties.getPath()));
+			request.doc(source);
+			try {
+				client.update(request).get();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
 		}
 		public List<String> search(String key){
 			if(!inited){

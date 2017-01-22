@@ -1,8 +1,8 @@
-package com.ttjkst.fileSystem;
+package com.ttjkst.elastic;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix="my.fileSystem")
-public class FileSytemProperties {
+public class ElasticProperties {
 	private String esUrl;
 	private String path;
 	private boolean esIgnoreIndex;

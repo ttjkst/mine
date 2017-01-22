@@ -12,13 +12,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.ttjkst.BootApplication;
+import com.ttjkst.elastic.ElasticAction;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes=BootApplication.class)
 public class SimpleFileSystemTest {
 	
 		@Autowired
-		private SimpleFileSystem fileSystem;
+		private ElasticAction fileSystem;
 //		@Test
 //		public  void persist(){
 //			File file = new File("C:\\Users\\ttjkst\\Desktop\\test\\1.txt");
@@ -42,13 +43,26 @@ public class SimpleFileSystemTest {
 //		public void delete(){
 //			fileSystem.delete("HELLOW");
 //		}
+//		@Test
+//		public void update(){
+//			File file = new File("C:\\Users\\ttjkst\\Desktop\\test\\1.txt");
+//			try {
+//				fileSystem.update(new FileInputStream(file), "2");
+//			} catch (FileNotFoundException e) {
+//				e.printStackTrace();
+//			}
+//		}
 		@Test
-		public void update(){
+		public void testMulitAction(){
 			File file = new File("C:\\Users\\ttjkst\\Desktop\\test\\1.txt");
+			fileSystem.persist(file, "6");
+			fileSystem.search("dd");
+			file = new File("C:\\Users\\ttjkst\\Desktop\\test\\3.txt");
 			try {
-				fileSystem.update(new FileInputStream(file), "2");
+				fileSystem.update(new FileInputStream(file),"6");
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
+			fileSystem.delete("6");
 		}
 }

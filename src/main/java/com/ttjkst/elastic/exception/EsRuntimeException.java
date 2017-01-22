@@ -1,4 +1,4 @@
-package com.ttjkst.fileSystem.exception;
+package com.ttjkst.elastic.exception;
 
 public class EsRuntimeException extends RuntimeException{
 

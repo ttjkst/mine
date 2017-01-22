@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable;
 import com.ttjkst.bean.AboutWhats;
 import com.ttjkst.bean.Kinds;
 import com.ttjkst.bean.LeaveWords;
-import com.ttjkst.bean.Words;
+import com.ttjkst.bean.Word;
 import com.ttjkst.dao.LWDAO;
 import com.ttjkst.dao.WordDAO;
 import com.ttjkst.service.ILeaveWordsService;

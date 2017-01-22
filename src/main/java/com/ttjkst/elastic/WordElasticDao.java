@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -17,6 +16,7 @@ import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
+import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.action.update.UpdateRequest;
@@ -26,9 +26,10 @@ import org.elasticsearch.search.SearchHits;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.ttjkst.bean.Word;
 import com.ttjkst.elastic.exception.EsRuntimeException;
 @Component
-public class ElasticAction {
+public class WordElasticDao {
 		private static String separator = "/";
 		@Autowired
 		private ElasticUitl elasticUitl;
@@ -36,48 +37,45 @@ public class ElasticAction {
 		public void persist(File file,String id){
 			try {
 				FileInputStream fileInputStream = new FileInputStream(file);
-				this.persist(fileInputStream, id);
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
 			
 		}
-		public void persist(InputStream fileInputStream,String id){
+		
+		public Word presist(InputStream fileInputStream,Word word){
 			try {
 				if(elasticUitl.getProp().isEsIgnoreIndex()){
 					createIndex();
 				}
 				Map<String, String> source = new HashMap<>();
-				
-				source.put("id",id);
-				source.put("content", stream2Str(fileInputStream,id,elasticUitl.getProp().getPath()));
-				elasticUitl.getTransportClient().prepareIndex(elasticUitl.getProp().getEsIndex(),
+				source.put("content", stream2Str(fileInputStream));
+				source.put("author", word.getAuthor());
+				source.put("title", word.getTitle());
+				source.put("create_time", word.getCreateTime().getTime()+"");
+				IndexResponse indexResponse = elasticUitl.getTransportClient().prepareIndex(elasticUitl.getProp().getEsIndex(),
 						elasticUitl.getProp().getEsType()).setSource(source).get();
+				word.setId(indexResponse.getId());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}finally {
+				elasticUitl.close();
+			}
+			return word;
+		}
+		
+		
+		public void delete(String id){
+			try {
+				elasticUitl.getTransportClient().prepareDelete(elasticUitl.getProp().getEsIndex(),
+						elasticUitl.getProp().getEsType(), id);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}finally {
 				elasticUitl.close();
 			}
 		}
-		
-		
-		public void delete(String id){
-			try {
-				File delFile = new File(elasticUitl.getProp().getPath()+separator+id);
-				
-				DeleteByQueryAction.INSTANCE.
-					newRequestBuilder(elasticUitl.getTransportClient()).
-					filter(QueryBuilders.matchQuery("id", id)).
-					source(elasticUitl.getProp().getEsIndex()).get();
-				
-				if(delFile.exists()){
-					delFile.delete();
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		
+		//暂时考虑不写
 		public void update(InputStream inputStream,String id){
 			try {
 				//先是获取文档中的id属性（非doc中的_id,这里的id是自己定义的id）
@@ -93,7 +91,7 @@ public class ElasticAction {
 				UpdateRequest request = new UpdateRequest(elasticUitl.getProp().getEsIndex(),elasticUitl.getProp().getEsType(),docId);
 				Map< String, String> source = new HashMap<>();
 				source.put("id", id);
-				source.put("content", stream2Str(inputStream, id, elasticUitl.getProp().getPath()));
+				source.put("content", stream2Str(inputStream));
 				request.doc(source);
 
 				elasticUitl.getTransportClient().update(request).get();
@@ -140,10 +138,14 @@ public class ElasticAction {
 			if(!isIndexExists()){
 				CreateIndexRequest createIndexRequest = new CreateIndexRequest(elasticUitl.getProp().getEsIndex());
 				Map<String, Object> source = new HashMap<>();
-				Map<String, String> idSettings = new HashMap<>();
-				idSettings.put("type", "string");
-				idSettings.put("store", "true");
-				source.put("id", idSettings);
+				Map<String, String> setting = new HashMap<>();
+				setting.put("type", "string");
+				setting.put("store", "true");
+				setting.put("index", "not_analyzed");
+				source.put("author", setting);
+				source.put("title", setting);
+				setting.put("type","long");
+				source.put("create_time", setting);			
 				Map<String, Object> prop = new HashMap<>();
 				prop.put("properties", source);
 				createIndexRequest.mapping(elasticUitl.getProp().getEsType(), prop);
@@ -154,54 +156,22 @@ public class ElasticAction {
 			}
 		}
 		
-		private static String stream2Str(InputStream fileInputStream,String id,String path){
+		private static String stream2Str(InputStream inputStream){
 			ByteArrayOutputStream arrayOutputStream = null;
-			File destDir = new File(path);
-			File dest = null;
-			FileOutputStream dOutputStream = null;
-			if(destDir.exists()){
-				if(!destDir.isDirectory()){
-					throw new RuntimeException("destDir is not a directory!");
-				}
-			}
-			dest = new File(path+separator+id);
-			if(dest.exists()){
-				dest.delete();
-			}else{
-				try {
-					dest.createNewFile();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-			try {
-				dOutputStream = new FileOutputStream(dest);
-			} catch (FileNotFoundException e1) {
-				e1.printStackTrace();
-			}
 			int len =-1;
 			byte[] b = new byte[1024];
 			try {
-				arrayOutputStream = new ByteArrayOutputStream(fileInputStream.available());
-			    while((len=fileInputStream.read(b))!=-1){
+				arrayOutputStream = new ByteArrayOutputStream(inputStream.available());
+			    while((len=inputStream.read(b))!=-1){
 			    	arrayOutputStream.write(b, 0, len);
-			    	dOutputStream.write(b, 0, len);
 			    }
 			    arrayOutputStream.flush();
-			    dOutputStream.flush();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}finally {
-				if(fileInputStream!=null){
+				if(inputStream!=null){
 					try {
-						fileInputStream.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-				if(dOutputStream!=null){
-					try {
-						dOutputStream.close();
+						inputStream.close();
 					} catch (IOException e) {
 						e.printStackTrace();
 					}

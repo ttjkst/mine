@@ -7,7 +7,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.ttjkst.bean.LeaveWords;
-import com.ttjkst.bean.Words;
+import com.ttjkst.bean.Word;
 import com.ttjkst.service.ILeaveWordsService;
 import com.ttjkst.service.IWordsService;
 import com.ttjkst.service.impl.LService;
@@ -27,7 +27,7 @@ public class TestCreateLw {
 	public void test(){
 		ILeaveWordsService lService = ctx.getBean(ILeaveWordsService.class);
 		IWordsService wService = ctx.getBean(IWordsService.class);
-		Words word = wService.getItbyId(17L);
+		Word word = wService.getItbyId(17L);
 		for(int i=0;i<=50;i++){
 			LeaveWords leaveWords = new LeaveWords();
 			leaveWords.setEmail("sss@qq.com");

@@ -3,19 +3,19 @@ package com.ttjkst.action.converter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 
-import com.ttjkst.bean.Words;
+import com.ttjkst.bean.Word;
 import com.ttjkst.service.IWordsService;
 
-public class String2Word implements Converter<String, Words>{
+public class String2Word implements Converter<String, Word>{
 
 	@Autowired
 	private IWordsService service; 
 	
-	public Words convert(String source) {
+	public Word convert(String source) {
 		if(source!=null&&!source.isEmpty()){
 			return this.service.getItbyId(Long.parseLong(source));
 		}
-		return null;
+		return new Word();
 	}
 
 	public IWordsService getService() {

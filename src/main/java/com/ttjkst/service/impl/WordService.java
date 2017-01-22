@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ttjkst.bean.AboutWhats;
 import com.ttjkst.bean.Kinds;
 import com.ttjkst.bean.LeaveWords;
-import com.ttjkst.bean.Words;
+import com.ttjkst.bean.Word;
 import com.ttjkst.dao.ABDAO;
 import com.ttjkst.dao.KindDAO;
 import com.ttjkst.dao.WordDAO;
@@ -52,7 +52,7 @@ public class WordService implements IWordsService{
 	private static String filePath = null;
 
 	public void detele(Long id) throws ServiceException {
-		Words w = this.getItbyId(id);
+		Word w = this.getItbyId(id);
 		if(filePath==null){
 		filePath = System.getProperty("filePath");
 		}
@@ -81,13 +81,13 @@ public class WordService implements IWordsService{
 
 	
 	@Transactional(readOnly=true)
-	public Page<Words> findall(int pageNo, int pageSize,final String aboutWhatName,
+	public Page<Word> findall(int pageNo, int pageSize,final String aboutWhatName,
 			final String searchName, final Boolean isNoPrcess) {
 		
 		Pageable page = new  PageRequest(pageNo, pageSize);
-		Specification<Words> specification  = new Specification<Words>() {
+		Specification<Word> specification  = new Specification<Word>() {
 
-			public Predicate toPredicate(Root<Words> root,
+			public Predicate toPredicate(Root<Word> root,
 					CriteriaQuery<?> query, CriteriaBuilder cb) {
 					Predicate all = null;
 					//all this is common use
@@ -116,7 +116,7 @@ public class WordService implements IWordsService{
 					if(isNoPrcess!=null){
 						Subquery<LeaveWords> subquery = cb.createQuery().subquery(LeaveWords.class);
 						Root<LeaveWords> subRoot = subquery.from(LeaveWords.class);
-						Path<Words> WordSubPath = subRoot.get("leaveFor");
+						Path<Word> WordSubPath = subRoot.get("leaveFor");
 						Expression<Boolean> hasReadEx = subRoot.get("hasRead");
 						Predicate p1 = cb.equal(hasReadEx, !isNoPrcess);
 						Expression<Long> subWordIdEx = WordSubPath.get("wId");
@@ -129,7 +129,7 @@ public class WordService implements IWordsService{
 			}
 			
 		};
-		Page<Words> pageResult = this.dao.findAll(specification, page);
+		Page<Word> pageResult = this.dao.findAll(specification, page);
 		//initialize
 //		pageResult.getContent();
 //		for(Words w:pageResult.getContent()){
@@ -140,7 +140,7 @@ public class WordService implements IWordsService{
 	}
 	
 
-	public Words update(Words word, InputStream srcWord, InputStream srcIntor)
+	public Word update(Word word, InputStream srcWord, InputStream srcIntor)
 			throws ServiceException {
 		if(filePath==null){
 			filePath = System.getProperty("LocalWebRoot");
@@ -149,7 +149,7 @@ public class WordService implements IWordsService{
 			throw new ServiceException("the loacalWebRoot is not defined");
 		}
 		try {
-			Words srcEnitity = this.dao.findOne(word.getwId());
+			Word srcEnitity = this.dao.findOne(word.getwId());
 			String aboutName = word.getwKind().getAboutwhat().getName();
 			String kindName  = word.getwKind().getkName();
 			
@@ -179,11 +179,11 @@ public class WordService implements IWordsService{
 		return word;
 	}
 
-	public Page<Words> findItByReadTimes(final String aboutWhatName, int size) {
+	public Page<Word> findItByReadTimes(final String aboutWhatName, int size) {
 		Pageable pageable = new PageRequest(0, size);
-		Specification<Words> specification = new Specification<Words>() {
+		Specification<Word> specification = new Specification<Word>() {
 			
-			public Predicate toPredicate(Root<Words> root, CriteriaQuery<?> query,
+			public Predicate toPredicate(Root<Word> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
 				if(aboutWhatName!=null&&!aboutWhatName.isEmpty()){
 					Path<Kinds> kindPath = root.get("wKind");
@@ -198,12 +198,12 @@ public class WordService implements IWordsService{
 		return dao.findAll(specification, pageable);
 	}
 
-	public Words getItbyId(Long id) {
+	public Word getItbyId(Long id) {
 		return dao.findOne(id);
 	}
 	
 	
-	private String getPathByMd5(Words word){
+	private String getPathByMd5(Word word){
 		String path = 
 				 "html"
 				+ separator
@@ -216,7 +216,7 @@ public class WordService implements IWordsService{
 						+ word.getwTimeOfInData().toString())) + ".html";
 		return path;
 	}
-	private String getIntorByMd5(Words word){
+	private String getIntorByMd5(Word word){
 		String intorPath = 
 				 "html"
 				+ separator
@@ -231,7 +231,7 @@ public class WordService implements IWordsService{
 						+ word.getwTimeOfInData().toString())) + ".html";
 		return intorPath;
 	}
-	public Words saveit(Words word, InputStream srcWord, InputStream srcIntor) throws ServiceException {
+	public Word saveit(Word word, InputStream srcWord, InputStream srcIntor) throws ServiceException {
 		//init
 		if(filePath==null){
 			filePath = System.getProperty("LocalWebRoot");

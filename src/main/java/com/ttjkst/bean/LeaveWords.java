@@ -34,8 +34,8 @@ public class LeaveWords {
 	@Column(length=1000)
 	private String saywhat;
 	
-	@ManyToOne(fetch=FetchType.LAZY,targetEntity=Words.class)
-	private Words leaveFor;
+	@ManyToOne(fetch=FetchType.LAZY,targetEntity=Word.class)
+	private Word leaveFor;
 	
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="time_in_date")
@@ -92,7 +92,7 @@ public class LeaveWords {
 		return hasRead;
 	}
 
-	public Words getLeaveFor() {
+	public Word getLeaveFor() {
 		return leaveFor;
 	}
 
@@ -100,7 +100,7 @@ public class LeaveWords {
 	 * @param leaveFor
 	 *            the leaveFor to set
 	 */
-	public void setLeaveFor(Words leaveFor) {
+	public void setLeaveFor(Word leaveFor) {
 		this.leaveFor = leaveFor;
 	}
 

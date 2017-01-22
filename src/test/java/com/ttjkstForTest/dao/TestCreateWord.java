@@ -11,7 +11,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.ttjkst.bean.Kinds;
-import com.ttjkst.bean.Words;
+import com.ttjkst.bean.Word;
 import com.ttjkst.service.IKindService;
 import com.ttjkst.service.IWordsService;
 import com.ttjkst.service.exception.ServiceException;
@@ -32,14 +32,14 @@ public class TestCreateWord {
 		
 		IWordsService wordsService = ctx.getBean(IWordsService.class); 
 		IKindService kindService = ctx.getBean(IKindService.class);
-		Words w = new Words(); 
+		Word w = new Word(); 
 		List<Kinds> k = kindService.getkindsList("编程与思考");
 		System.out.println("k"+k);
 		List<Kinds> k2 = kindService.getkindsList("关于生活");
 		System.out.println("k2"+k2);
 		System.setProperty("LocalWebRoot","src/main/webapp/");
 		for(int i=0; i<=300 ; i++){
-			w = new Words();
+			w = new Word();
 			w.setCanShow(true);
 			w.setwAuthor("ttjkst");
 			w.setwTimeOfInData(new Date());

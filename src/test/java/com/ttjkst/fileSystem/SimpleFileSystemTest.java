@@ -12,14 +12,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.ttjkst.BootApplication;
-import com.ttjkst.elastic.ElasticAction;
+import com.ttjkst.elastic.WordElasticDao;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes=BootApplication.class)
 public class SimpleFileSystemTest {
 	
 		@Autowired
-		private ElasticAction fileSystem;
+		private WordElasticDao fileSystem;
 //		@Test
 //		public  void persist(){
 //			File file = new File("C:\\Users\\ttjkst\\Desktop\\test\\1.txt");

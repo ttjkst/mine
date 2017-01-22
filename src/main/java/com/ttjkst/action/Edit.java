@@ -20,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ttjkst.bean.AboutWhats;
 import com.ttjkst.bean.Kinds;
-import com.ttjkst.bean.Words;
+import com.ttjkst.bean.Word;
 import com.ttjkst.service.IAboutWhatService;
 import com.ttjkst.service.IKindService;
 import com.ttjkst.service.IWordsService;
@@ -66,9 +66,9 @@ public class Edit implements ServletContextAware{
 		AboutWhats aboutWhat = new AboutWhats();
 		aboutWhat.setName(aboutWhatName);
 		kind.setAboutwhat(aboutWhat);
-		Words word = new Words();
+		Word word = new Word();
 							//id    title
-			 word = new Words(null, title,
+			 word = new Word(null, title,
 				//path kind  author  time_in_dateBase
 				null,  kind, author, new Date(),
 				// canSow                        //readTimes intro_str  leaveWords
@@ -109,7 +109,7 @@ public class Edit implements ServletContextAware{
 		if(id==null){
 			return !this.wordsService.hasWordByTitle(title, kindName, aboutWhatName);
 		}else{
-			Words word = wordsService.getItbyId(id);
+			Word word = wordsService.getItbyId(id);
 			if(word.getwTitle()!=null){
 				return word.getwTitle().equals(title);
 			}
@@ -132,9 +132,9 @@ public class Edit implements ServletContextAware{
 		AboutWhats aboutWhat = new AboutWhats();
 		aboutWhat.setName(aboutWhatName);
 		kind.setAboutwhat(aboutWhat);
-		Words word = new Words();
+		Word word = new Word();
 							//id    title
-			 word = new Words(id, title,
+			 word = new Word(id, title,
 				//path kind  author  time_in_dateBase
 				null,  kind, author, new Date(),
 				// canSow                        //readTimes intro_str  leaveWords

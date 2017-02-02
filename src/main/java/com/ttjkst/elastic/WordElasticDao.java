@@ -10,13 +10,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.action.update.UpdateRequest;
@@ -42,26 +47,46 @@ public class WordElasticDao {
 			}
 			
 		}
-		
+		//test
 		public Word presist(InputStream fileInputStream,Word word){
+				this.presist(new HashMap<>(),
+						//begin
+						x->{
+							x.put("content", stream2Str(fileInputStream));
+							x.put("author", word.getAuthor());
+							x.put("title", word.getTitle());
+							x.put("create_time", word.getCreateTime().getTime()+"");
+							return x;
+						}
+						,
+						//after result 
+						ctx->{
+							word.setId(ctx.get("id").toString());
+							return word;
+						});
+			
+			return word;
+		}
+		public <T> T presist(Map<String, Object> ctx,Function<Map<String, String> , Map<String, String>> mapper,Function<Map<String, Object>, T> then){
+			if(ctx==null){
+				throw new IllegalArgumentException("ctx must not be null !");
+			}
+			if(elasticUitl.getProp().isEsIgnoreIndex()){
+				createIndex();
+			}
+			Map<String, String> source = new HashMap<>();
+			source = mapper.apply(source);
+			IndexResponse indexResponse;
 			try {
-				if(elasticUitl.getProp().isEsIgnoreIndex()){
-					createIndex();
-				}
-				Map<String, String> source = new HashMap<>();
-				source.put("content", stream2Str(fileInputStream));
-				source.put("author", word.getAuthor());
-				source.put("title", word.getTitle());
-				source.put("create_time", word.getCreateTime().getTime()+"");
-				IndexResponse indexResponse = elasticUitl.getTransportClient().prepareIndex(elasticUitl.getProp().getEsIndex(),
+				indexResponse = elasticUitl.getTransportClient().prepareIndex(elasticUitl.getProp().getEsIndex(),
 						elasticUitl.getProp().getEsType()).setSource(source).get();
-				word.setId(indexResponse.getId());
+				ctx.put("id", indexResponse.getId());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}finally {
 				elasticUitl.close();
 			}
-			return word;
+			return then.apply(ctx);
 		}
 		
 		
@@ -75,7 +100,7 @@ public class WordElasticDao {
 				elasticUitl.close();
 			}
 		}
-		//暂时考虑不写
+		//test
 		public void update(InputStream inputStream,String id){
 			try {
 				//先是获取文档中的id属性（非doc中的_id,这里的id是自己定义的id）
@@ -104,17 +129,37 @@ public class WordElasticDao {
 			}
 			
 		}
-		public List<String> search(String key){
+		//good
+		public void update(Map<String, Object> ctx,String id,Consumer<UpdateRequest> mapper){
+			if(ctx==null){
+				throw new IllegalArgumentException("ctx must not be null !");
+			}
 			try {
-				SearchResponse response = elasticUitl.getTransportClient().prepareSearch(elasticUitl.getProp().getEsIndex()).
-						setTypes(elasticUitl.getProp().getEsType()).setSearchType(SearchType.DFS_QUERY_THEN_FETCH).
-						setQuery(QueryBuilders.termQuery("content", key)).addStoredField("id").get();
-				SearchHits hits = response.getHits();
-				List<String> result = new ArrayList<>();
-				hits.forEach(x->{
-					result.add( x.getFields().get("id").getValues().get(0).toString());
-				});
-				return result;
+				UpdateRequest request = new UpdateRequest(elasticUitl.getProp().getEsIndex(),elasticUitl.getProp().getEsType(),id);
+				mapper.accept(request);
+				elasticUitl.getTransportClient().update(request).get();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}finally {
+				elasticUitl.close();
+			}
+			
+		}
+		
+		
+		
+		
+		public Map<String, Object> search(Map<String,Object> ctx,Consumer<SearchRequestBuilder> builder,Function<SearchResponse, Map<String, Object>> resultMapper){
+			if(ctx==null){
+				throw new IllegalArgumentException("ctx must not be null !");
+			}
+			try {
+				SearchRequestBuilder base = elasticUitl.getTransportClient().prepareSearch(elasticUitl.getProp().getEsIndex()).
+						setTypes(elasticUitl.getProp().getEsType());
+				builder.accept(base);
+				return resultMapper.apply(base.get());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}finally {
@@ -155,7 +200,7 @@ public class WordElasticDao {
 				}
 			}
 		}
-		
+		//不是很好的方法
 		private static String stream2Str(InputStream inputStream){
 			ByteArrayOutputStream arrayOutputStream = null;
 			int len =-1;

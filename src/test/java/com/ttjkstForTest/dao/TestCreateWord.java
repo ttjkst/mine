@@ -41,14 +41,14 @@ public class TestCreateWord {
 		for(int i=0; i<=300 ; i++){
 			w = new Word();
 			w.setCanShow(true);
-			w.setwAuthor("ttjkst");
-			w.setwTimeOfInData(new Date());
+		//	w.setwAuthor("ttjkst");
+			//w.setwTimeOfInData(new Date());
 			if(i>100){
-			w.setwTitle("标题：编程与思考"+i);
-			w.setwKind(k.get(0));
+			//w.setwTitle("标题：编程与思考"+i);
+			//w.setwKind(k.get(0));
 			}else{
-				w.setwTitle("标题：关于生活"+i);
-				w.setwKind(k2.get(0));
+				//w.setwTitle("标题：关于生活"+i);
+				//w.setwKind(k2.get(0));
 			}
 			try {
 				wordsService.saveit(w, new FileInputStream(new File("src/main/webapp/html/关于编程/测试/00E303E556D7A5639C5B803CB96B0813.html")),

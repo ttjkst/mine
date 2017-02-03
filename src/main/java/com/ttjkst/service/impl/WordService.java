@@ -1,9 +1,16 @@
 package com.ttjkst.service.impl;
 
 
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -13,14 +20,17 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,7 +66,6 @@ public class WordService implements IWordsService{
 	private ABDAO  abDao;
 	
 	
-	private String separator = "/";
 	
 	
 	@Autowired
@@ -82,7 +91,7 @@ public class WordService implements IWordsService{
 			final String searchName, final Boolean isNoPrcess) {
 		Pageable page = new  PageRequest(pageNo, pageSize);
 		if(isNoPrcess==null){
-			elastic.search(elasticUitl.getProp().getEsIndex(), elasticUitl.getProp().getEsType(),
+		Map<String, Object> map =	elastic.search(elasticUitl.getProp().getEsIndex(), elasticUitl.getProp().getEsType(),
 					new HashMap<>(), (x)->{
 						
 						  x.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
@@ -99,17 +108,14 @@ public class WordService implements IWordsService{
 						  x.addStoredField("author");
 						  x.addStoredField("create_time");
 						}, 
-						resultMapper->{
-						resultMapper.getHits().forEach(x->{
-							//need fixed
-						});
-						return null;
-					});
-			
+					resultMapper);
+				map.put("pageable", page);
+		return this.map2page(map);
 		}
 		
 		
 		
+		//not finished
 		Specification<Word> specification  = new Specification<Word>() {
 
 			public Predicate toPredicate(Root<Word> root,
@@ -164,13 +170,31 @@ public class WordService implements IWordsService{
 		return pageResult;
 	}
 	
-    //not finished
+	
+	
+    //not finished  kind and aboutWhat
 	public Word update(Word word, InputStream srcWord, InputStream srcIntor)
 			throws ServiceException {
-		elastic.update(elasticUitl.getProp().getEsIndex(), elasticUitl.getProp().getEsType(), new HashMap<>(), word.getId(), x->{
-			
-		});
-		
+		if(srcWord==null){
+			elastic.update(elasticUitl.getProp().getEsIndex(), elasticUitl.getProp().getEsType(), new HashMap<>(), word.getId(), x->{
+				Map<String, String> map = new HashMap<>();
+				map.put("kindName", word.getKind().getkName());
+				map.put("aboutWhatName", word.getKind().getAboutwhat().getName());
+				map.put("author", word.getAuthor());
+				map.put("title", word.getTitle());
+			});
+		}else{
+			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(srcWord));
+			String content = bufferedReader.lines().reduce("", (x1,x2)->{return x1+x2;});
+			elastic.update(elasticUitl.getProp().getEsIndex(), elasticUitl.getProp().getEsType(), new HashMap<>(), word.getId(), x->{
+				Map<String, String> map = new HashMap<>();
+				map.put("kindName", word.getKind().getkName());
+				map.put("aboutWhatName", word.getKind().getAboutwhat().getName());
+				map.put("author", word.getAuthor());
+				map.put("title", word.getTitle());
+				map.put("content", content);
+			});
+		}		
 		dao.save(word);
 		return word;
 	}
@@ -197,21 +221,29 @@ public class WordService implements IWordsService{
 	
 	//not finished
 	public Word getItbyId(String id) {
+		//from dataSource
 		Word data =  dao.findOne(id);
 		elastic.get(elasticUitl.getProp().getEsIndex(), elasticUitl.getProp().getEsType(), id, x->{
 			data.getAuthor();	
 		});
-		//from dataSource
 		return dao.findOne(id);
 	}
 	
 	
 	//not finished
 	public Word saveit(Word word, InputStream srcWord, InputStream srcIntor) throws ServiceException {
+		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(srcWord));
+		String content = bufferedReader.lines().reduce("", (x1,x2)->{return x1+x2;});
 		elastic.presist(elasticUitl.getProp().getEsIndex(), elasticUitl.getProp().getEsType(), new HashMap<>(), mapper->{
+			mapper.put("kindName", word.getKind().getkName());
+			mapper.put("aboutWhatName", word.getKind().getAboutwhat().getName());
+			mapper.put("author", word.getAuthor());
+			mapper.put("title", word.getTitle());
+			mapper.put("content", content);
 			return mapper;
 		}, then->{
 			String id = then.get("id").toString();
+			word.setId(id);
 			return word;
 		});
 		this.dao.save(word);
@@ -219,6 +251,125 @@ public class WordService implements IWordsService{
 		return word;
 	}
 
+	// tools
+	// mapper
+		private  Function<SearchResponse, Map<String, Object>> resultMapper = x1->{
+			List<Word> list = new ArrayList<>();
+			x1.getHits().forEach(x->{
+				Word word = new Word();
+				word.setId(x.getId());
+				
+				String title = x.getFields().get("title").getValues().get(0).toString();
+				String author = x.getFields().get("author").getValues().get(0).toString();
+				String create_time = x.getFields().get("create_time").getValues().get(0).toString();
+				
+				word.setTitle(title);
+				word.setAuthor(author);
+				word.setCreateTime(new Date(Long.parseLong(create_time)));
+				list.add(word);
+			});
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("content", list);
+			map.put("total", x1.getHits().getTotalHits());
+			return map;
+		};
+		//
+		private Page<Word>  map2page(Map<String, Object> map){
+			Page<Word> result = new Page<Word>() {
+				
+				Pageable pageable = (Pageable)map.get("pageable");
+				@SuppressWarnings("unchecked")
+				List<Word> content = (List<Word>)map.get("content");
+				
+				long total = (long)map.get("total");
+				@Override
+				public Iterator<Word> iterator() {
+					
+					return content.iterator();
+				}
+				
+				@Override
+				public Pageable previousPageable() {
+					return pageable.previousOrFirst();
+				}
+				
+				@Override
+				public Pageable nextPageable() {
+					return pageable.next();
+				}
+				
+				@Override
+				public boolean isLast() {
+					
+					return getTotalPages()==pageable.getPageNumber();
+				}
+				
+				@Override
+				public boolean isFirst() {
+					return 0==pageable.getPageNumber();
+				}
+				
+				@Override
+				public boolean hasPrevious() {
+					
+					return !isFirst();
+				}
+				
+				@Override
+				public boolean hasNext() {
+					return !isLast();
+				}
+				
+				@Override
+				public boolean hasContent() {
+					return !content.isEmpty();
+				}
+				
+				@Override
+				public Sort getSort() {
+					throw new UnsupportedOperationException("no overide");
+				}
+				
+				@Override
+				public int getSize() {
+					
+					return pageable.getPageSize();
+				}
+				
+				@Override
+				public int getNumberOfElements() {
+					return content.size();
+				}
+				
+				@Override
+				public int getNumber() {
+					return pageable.getPageNumber();
+				}
+				
+				@Override
+				public List<Word> getContent() {
+					return content;
+				}
+				
+				@Override
+				public <S> Page<S> map(Converter<? super Word, ? extends S> converter) {
+					throw new UnsupportedOperationException("no overide");
+				}
+				
+				@Override
+				public int getTotalPages() {
+					int totalpages = ((int)total/pageable.getPageSize())+((int)total)%pageable.getPageSize()==0?0:1;
+					return totalpages;
+				}
+				
+				@Override
+				public long getTotalElements() {
+					return total;
+				}
+			};
+			
+			return result;
+		}
 	
 	
 }

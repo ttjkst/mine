@@ -3,6 +3,7 @@ package com.ttjkst.service.impl;
 
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -12,6 +13,10 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
+import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,6 +36,8 @@ import com.ttjkst.elastic.ElasticDao;
 import com.ttjkst.elastic.ElasticUitl;
 import com.ttjkst.service.IWordsService;
 import com.ttjkst.service.exception.ServiceException;
+
+
 
 @Service
 @Transactional
@@ -55,7 +62,6 @@ public class WordService implements IWordsService{
 	@Autowired
 	private ElasticDao elastic;
 	
-	private static String filePath = null;
 
 	public void detele(String id) throws ServiceException {
 		//elastic delete
@@ -63,7 +69,7 @@ public class WordService implements IWordsService{
 	   dao.delete(id);
 	}
 
-	// need fixed
+	// need fixed question search mysql or elastic ?
 	public boolean hasWordByTitle(String title, String kindName,
 			String aboutWhatName) {
 		Integer result = 0;
@@ -74,8 +80,36 @@ public class WordService implements IWordsService{
 	@Transactional(readOnly=true)
 	public Page<Word> findall(int pageNo, int pageSize,final String aboutWhatName,
 			final String searchName, final Boolean isNoPrcess) {
-		
 		Pageable page = new  PageRequest(pageNo, pageSize);
+		if(isNoPrcess==null){
+			elastic.search(elasticUitl.getProp().getEsIndex(), elasticUitl.getProp().getEsType(),
+					new HashMap<>(), (x)->{
+						
+						  x.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
+						  x.setFrom(page.getOffset());
+						  x.setSize(page.getPageSize());
+						  
+						  x.setQuery(QueryBuilders.matchQuery("content", searchName));
+						  BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+						  List<QueryBuilder> musts = queryBuilder.must();
+						  musts.add(QueryBuilders.matchQuery("kindName", searchName));
+						  musts.add(QueryBuilders.matchQuery("aboutWhatName", aboutWhatName));
+						  x.setPostFilter(queryBuilder);
+						  x.addStoredField("title");
+						  x.addStoredField("author");
+						  x.addStoredField("create_time");
+						}, 
+						resultMapper->{
+						resultMapper.getHits().forEach(x->{
+							//need fixed
+						});
+						return null;
+					});
+			
+		}
+		
+		
+		
 		Specification<Word> specification  = new Specification<Word>() {
 
 			public Predicate toPredicate(Root<Word> root,

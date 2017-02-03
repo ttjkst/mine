@@ -7,6 +7,7 @@
     6.readedTimes,变动较大，不考虑
     7.wAuthor，可以
     9.canShow，不考虑
+    10.kindname,aboutWhatname hasnoprocessLw ,以上字段必须与elastic同步or **考虑其他方法查询 due to hasnoprocessLw
     将word 部分属性纳入到elasticsearch 中的好处：
     elasticsearch是一款基于lunce开发的服务。它使用起来比较简单，效率高效，并且能够兼容lunce的语法。
     并支持强大全文检索功能和分布式特征。而且elasticsearch在生产环境使用较多，因而证明它的安全可靠性。

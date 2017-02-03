@@ -40,6 +40,9 @@ public class Word implements Serializable {
 	@Transient
 	private String author;
 	
+	@Column(name="hasNoProcessLw")
+	private boolean hasNoProcessLw;
+	
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="create_time")
 	private Date createTime;
@@ -147,6 +150,16 @@ public class Word implements Serializable {
 
 	public void setLeaveWords(Set<LeaveWords> leaveWords) {
 		this.leaveWords = leaveWords;
+	}
+
+
+	public boolean isHasNoProcessLw() {
+		return hasNoProcessLw;
+	}
+
+
+	public void setHasNoProcessLw(boolean hasNoProcessLw) {
+		this.hasNoProcessLw = hasNoProcessLw;
 	}
 	
 	

@@ -1,9 +1,8 @@
 package com.ttjkst.service.impl;
 
 
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -13,7 +12,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,14 +27,18 @@ import com.ttjkst.bean.Word;
 import com.ttjkst.dao.ABDAO;
 import com.ttjkst.dao.KindDAO;
 import com.ttjkst.dao.WordDAO;
+import com.ttjkst.elastic.ElasticDao;
+import com.ttjkst.elastic.ElasticUitl;
 import com.ttjkst.service.IWordsService;
 import com.ttjkst.service.exception.ServiceException;
-import com.ttjkst.tools.MD5Tool;
 
 @Service
 @Transactional
 public class WordService implements IWordsService{
 	
+	
+	@Autowired
+	private ElasticUitl elasticUitl;
 	@Autowired
 	private WordDAO dao;
 	
@@ -49,37 +51,26 @@ public class WordService implements IWordsService{
 	
 	private String separator = "/";
 	
+	
+	@Autowired
+	private ElasticDao elastic;
+	
 	private static String filePath = null;
 
-	public void detele(Long id) throws ServiceException {
-		Word w = this.getItbyId(id);
-		if(filePath==null){
-		filePath = System.getProperty("filePath");
-		}
-		boolean deletePath = false;
-		boolean deleteIntor = false;
-		if(filePath==null||filePath.isEmpty()){
-				throw new ServiceException("the filePath is not defined");
-		
-		}
-		try {
-		  deleteIntor =	FileUtils.deleteQuietly(new File(filePath+w.getIntroductionPath()));
-		  deletePath  =	FileUtils.deleteQuietly(new File(filePath+w.getwPath()));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}finally {
-			dao.delete(id);	
-		}
-		
+	public void detele(String id) throws ServiceException {
+		//elastic delete
+	   elastic.delete(elasticUitl.getProp().getEsIndex(), elasticUitl.getProp().getEsType(), id);
+	   dao.delete(id);
 	}
 
+	// need fixed
 	public boolean hasWordByTitle(String title, String kindName,
 			String aboutWhatName) {
-		Integer result = dao.countWordTitle(title, kindName, aboutWhatName);
+		Integer result = 0;
 		return result.equals(0)?false:true;
 	}
 
-	
+	//need fixed
 	@Transactional(readOnly=true)
 	public Page<Word> findall(int pageNo, int pageSize,final String aboutWhatName,
 			final String searchName, final Boolean isNoPrcess) {
@@ -139,46 +130,17 @@ public class WordService implements IWordsService{
 		return pageResult;
 	}
 	
-
+    //not finished
 	public Word update(Word word, InputStream srcWord, InputStream srcIntor)
 			throws ServiceException {
-		if(filePath==null){
-			filePath = System.getProperty("LocalWebRoot");
-		}
-		if(filePath==null||filePath.isEmpty()){
-			throw new ServiceException("the loacalWebRoot is not defined");
-		}
-		try {
-			Word srcEnitity = this.dao.findOne(word.getwId());
-			String aboutName = word.getwKind().getAboutwhat().getName();
-			String kindName  = word.getwKind().getkName();
+		elastic.update(elasticUitl.getProp().getEsIndex(), elasticUitl.getProp().getEsType(), new HashMap<>(), word.getId(), x->{
 			
-			Kinds kind = this.kDao.getItBy2Name(kindName, aboutName);
-			if(kind==null){
-				AboutWhats aboutWhat = this.abDao.getItByName(aboutName);
-				if(aboutWhat==null){
-					aboutWhat = this.abDao.save(new AboutWhats(null, aboutName));
-				}
-				kind = new Kinds(null, kindName, aboutWhat);
-				kind = this.kDao.save(kind);
-			}
-			word.setwKind(kind);
-			word.setIntroductionPath(srcEnitity.getIntroductionPath());
-			word.setwPath(srcEnitity.getwPath());
-			word  = this.dao.save(word);
-			if(srcWord!=null){
-				FileUtils.copyInputStreamToFile(srcWord, new File(filePath+separator+word.getwPath()));
-			}
-			if(srcIntor!=null){
-				FileUtils.copyInputStreamToFile(srcIntor,new File(filePath+separator+word.getIntroductionPath()));
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		});
 		
+		dao.save(word);
 		return word;
 	}
-
+	//need fixed
 	public Page<Word> findItByReadTimes(final String aboutWhatName, int size) {
 		Pageable pageable = new PageRequest(0, size);
 		Specification<Word> specification = new Specification<Word>() {
@@ -198,77 +160,31 @@ public class WordService implements IWordsService{
 		return dao.findAll(specification, pageable);
 	}
 
-	public Word getItbyId(Long id) {
+	
+	//not finished
+	public Word getItbyId(String id) {
+		Word data =  dao.findOne(id);
+		elastic.get(elasticUitl.getProp().getEsIndex(), elasticUitl.getProp().getEsType(), id, x->{
+			data.getAuthor();	
+		});
+		//from dataSource
 		return dao.findOne(id);
 	}
 	
 	
-	private String getPathByMd5(Word word){
-		String path = 
-				 "html"
-				+ separator
-				+ word.getwKind().getAboutwhat()
-						.getName()
-				+ separator
-				+ word.getwKind().getkName()
-				+ separator
-				+ (new MD5Tool().MD5("" + word.getwTitle()
-						+ word.getwTimeOfInData().toString())) + ".html";
-		return path;
-	}
-	private String getIntorByMd5(Word word){
-		String intorPath = 
-				 "html"
-				+ separator
-				+ word.getwKind().getAboutwhat()
-						.getName()
-				+ separator
-				+ word.getwKind().getkName()
-				+ separator
-				+ "introduction"
-				+ separator
-				+ (new MD5Tool().MD5("" + word.getwTitle()
-						+ word.getwTimeOfInData().toString())) + ".html";
-		return intorPath;
-	}
+	//not finished
 	public Word saveit(Word word, InputStream srcWord, InputStream srcIntor) throws ServiceException {
-		//init
-		if(filePath==null){
-			filePath = System.getProperty("LocalWebRoot");
-		}
-		if(filePath==null||filePath.isEmpty()){
-			throw new ServiceException("the loacalWebRoot is not defined");
-		}
+		elastic.presist(elasticUitl.getProp().getEsIndex(), elasticUitl.getProp().getEsType(), new HashMap<>(), mapper->{
+			return mapper;
+		}, then->{
+			String id = then.get("id").toString();
+			return word;
+		});
+		this.dao.save(word);
 		
-		
-		String aboutName = word.getwKind().getAboutwhat().getName();
-		String kindName  = word.getwKind().getkName();
-		
-		Kinds kind = this.kDao.getItBy2Name(kindName, aboutName);
-		if(kind==null){
-			AboutWhats aboutWhat = this.abDao.getItByName(aboutName);
-			if(aboutWhat==null){
-				aboutWhat = this.abDao.save(new AboutWhats(null, aboutName));
-			}
-			kind = new Kinds(null, kindName, aboutWhat);
-			kind = this.kDao.save(kind);
-		}
-		word.setwKind(kind);
-		// where is the artist  located in
-		String pathFilePath  = getPathByMd5(word);
-		// where is the intor located in
-		String intorFilePath = getIntorByMd5(word);
-		 try {
-		    FileUtils.copyInputStreamToFile(srcWord, new File(filePath+separator+pathFilePath));
-			FileUtils.copyInputStreamToFile(srcIntor,new File(filePath+separator+intorFilePath));
-			
-			word.setIntroductionPath(intorFilePath);
-			word.setwPath(pathFilePath);
-			this.dao.save(word);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
+		return word;
 	}
+
+	
 	
 }

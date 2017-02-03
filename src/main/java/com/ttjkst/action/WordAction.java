@@ -48,16 +48,11 @@ public class WordAction {
 	  Page<Word> myPage =this.wordsService.findItByReadTimes(aboutWhat, 10);
 	  List<Word> content = myPage.getContent();
 	  Iterator<Word> it = content.iterator();
-		while (it.hasNext()) {
-			Word word_i = it.next();
-			word_i.setLeaveWords(null);
-			word_i.setwKind(null);
-		}
 	  return content;
   }
   //as last need fixed
   @RequestMapping("/readAndEdit")
-  public ModelAndView  readAndEdit(@RequestParam("id")long id){
+  public ModelAndView  readAndEdit(@RequestParam("id")String id){
 	  ModelAndView modelAndView = new ModelAndView("update");
 	  modelAndView.addObject("word", this.wordsService.getItbyId(id));
 	  System.out.println(this.wordsService.getItbyId(id));

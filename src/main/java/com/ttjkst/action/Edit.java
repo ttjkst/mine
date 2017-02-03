@@ -52,6 +52,8 @@ public class Edit implements ServletContextAware{
 		return this.kindService.getkindsList(msg);
 	}
 	
+	
+	//need fixed
 	@ResponseBody
 	@RequestMapping(value="/saveWord")
 	public Boolean saveWord(@RequestParam("wordText")MultipartFile wordText,@RequestParam("intor")MultipartFile inrotext,
@@ -68,11 +70,7 @@ public class Edit implements ServletContextAware{
 		kind.setAboutwhat(aboutWhat);
 		Word word = new Word();
 							//id    title
-			 word = new Word(null, title,
-				//path kind  author  time_in_dateBase
-				null,  kind, author, new Date(),
-				// canSow                        //readTimes intro_str  leaveWords
-				canShow.equals("true")?true:false,0L,        null, 		 null);
+			 word = new Word();
 			 
 			 try {
 				this.wordsService.saveit(word, wordText.getInputStream(), inrotext.getInputStream());
@@ -103,20 +101,22 @@ public class Edit implements ServletContextAware{
 		return true;
 	}
 	
+	
+	//need fixed
 	@ResponseBody
 	@RequestMapping(value="/verifyTitle")
-	public Boolean verifyTitle(@RequestParam("id")Long id,@RequestParam("title")String title,@RequestParam("kindName")String kindName,@RequestParam("aboutWhatName")String  aboutWhatName,@RequestParam("webDoWhat")String webDoWhat){
+	public Boolean verifyTitle(@RequestParam("id")String id,@RequestParam("title")String title,@RequestParam("kindName")String kindName,@RequestParam("aboutWhatName")String  aboutWhatName,@RequestParam("webDoWhat")String webDoWhat){
 		if(id==null){
 			return !this.wordsService.hasWordByTitle(title, kindName, aboutWhatName);
 		}else{
 			Word word = wordsService.getItbyId(id);
-			if(word.getwTitle()!=null){
-				return word.getwTitle().equals(title);
+			if(word.getTitle()!=null){
+				return word.getTitle().equals(title);
 			}
 		}
 		return false;
 	}
-	
+	//need fixed
 	@ResponseBody
 	@RequestMapping("/update")
 	public Boolean update(@RequestParam("wordId")Long id,@RequestParam("wordText")MultipartFile wordText,@RequestParam("intor")MultipartFile inrotext,
@@ -134,11 +134,7 @@ public class Edit implements ServletContextAware{
 		kind.setAboutwhat(aboutWhat);
 		Word word = new Word();
 							//id    title
-			 word = new Word(id, title,
-				//path kind  author  time_in_dateBase
-				null,  kind, author, new Date(),
-				// canSow                        //readTimes intro_str  leaveWords
-				canShow.equals("true")?true:false,0L,        null, 		 null);
+			 word = new Word();
 			 
 			 try {
 				this.wordsService.update(word, wordText.getSize()==0?null:wordText.getInputStream(), inrotext.getSize()==0?null:inrotext.getInputStream());
@@ -169,7 +165,7 @@ public class Edit implements ServletContextAware{
 		return true;
 	}
 	@RequestMapping("/delete")
-	public ResponseEntity<String> delete(@RequestParam("id")Long id){
+	public ResponseEntity<String> delete(@RequestParam("id")String id){
 		assertNotNull(id);
 		if(id.equals(null)){
 			throw new IllegalArgumentException("the args must has a  id,but it do not has one");

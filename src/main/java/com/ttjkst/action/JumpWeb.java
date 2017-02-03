@@ -15,12 +15,12 @@ public class JumpWeb {
 	@Autowired
 	private IWordsService wordService;
 	
+	
+	//need fixed
 	@RequestMapping("/readMore")
-	public ModelAndView readMore(@RequestParam("id")Long id){
+	public ModelAndView readMore(@RequestParam("id")String id){
 		ModelAndView andView = new ModelAndView("readpage");
 		Word words = wordService.getItbyId(id);
-		String wpath = words.getwPath().replaceAll("\\\\", "/");
-		words.setwPath(wpath);
 		andView.addObject(words);
 		return andView;
 	}

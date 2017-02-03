@@ -10,7 +10,7 @@ import com.ttjkst.service.exception.ServiceException;
 public interface IWordsService {
 	public Word saveit(Word word,InputStream srcWord,InputStream srcIntor) throws ServiceException;
 
-	public void detele(Long id) throws ServiceException;
+	public void detele(String id) throws ServiceException;
 
 	public boolean hasWordByTitle(String title, String kindName,
 			String abouWhatName);
@@ -23,6 +23,6 @@ public interface IWordsService {
 
 	public Page<Word> findItByReadTimes(final String aboutWhatName, int size);
 
-	public Word getItbyId(Long id);
+	public Word getItbyId(String id);
 
 }

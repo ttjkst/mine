@@ -13,7 +13,7 @@ public class String2Word implements Converter<String, Word>{
 	
 	public Word convert(String source) {
 		if(source!=null&&!source.isEmpty()){
-			return this.service.getItbyId(Long.parseLong(source));
+			return this.service.getItbyId(source);
 		}
 		return new Word();
 	}

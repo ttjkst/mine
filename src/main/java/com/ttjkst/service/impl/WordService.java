@@ -100,12 +100,13 @@ public class WordService implements IWordsService{
 						  x.setQuery(QueryBuilders.multiMatchQuery(searchName, "content","author","title"));
 						  BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 						  List<QueryBuilder> musts = queryBuilder.must();
-						  musts.add(QueryBuilders.matchQuery("kindName", searchName));
 						  musts.add(QueryBuilders.matchQuery("aboutWhatName", aboutWhatName));
 						  x.setPostFilter(queryBuilder);
 						  x.addStoredField("title");
 						  x.addStoredField("author");
 						  x.addStoredField("create_time");
+						  x.addStoredField("canshow");
+						  x.addStoredField("hasNoProcessLw");
 						}, 
 					resultMapper);
 				map.put("pageable", page);
@@ -222,7 +223,7 @@ public class WordService implements IWordsService{
 	}
 
 	
-	//not finished
+	//finished  ?
 	public Word getItbyId(String id) {
 		//from dataSource
 		Word data =  dao.findOne(id);
@@ -265,6 +266,7 @@ public class WordService implements IWordsService{
 			mapper.put("aboutWhatName", word.getKind().getAboutwhat().getName());
 			mapper.put("author", word.getAuthor());
 			mapper.put("title", word.getTitle());
+			mapper.put("create_time", word.getCreateTime().getTime()+"");
 			mapper.put("content", content);
 			mapper.put("hasNoProcessLw", word.isHasNoProcessLw()+"");
 			mapper.put("canshow", word.isCanShow()+"");
@@ -307,7 +309,7 @@ public class WordService implements IWordsService{
 				String author = x.getFields().get("author").getValues().get(0).toString();
 				String create_time = x.getFields().get("create_time").getValues().get(0).toString();
 				String canshowStr   = x.getFields().get("canshow").getValues().get(0).toString();
-				String hasNoProcessStr = x.getFields().get("hasNoProcess").getValues().get(0).toString();
+				String hasNoProcessStr = x.getFields().get("hasNoProcessLw").getValues().get(0).toString();
 				word.setTitle(title);
 				word.setAuthor(author);
 				word.setCreateTime(new Date(Long.parseLong(create_time)));

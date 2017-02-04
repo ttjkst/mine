@@ -8,6 +8,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
+import com.ttjkst.boot.config.BeforeSpringDo;
+
 
 @SpringBootApplication
 @PropertySource({"classpath:application.properties"})
@@ -19,7 +21,8 @@ public class BootApplication extends SpringBootServletInitializer{
 	
 	
 	public static void main(String[] args) {
-			SpringApplication.run(BootApplication.class, args);
+			SpringApplication application = new SpringApplication(BootApplication.class);
+			application.run(args);
 	}
 
 	@Override

@@ -19,6 +19,7 @@ import org.elasticsearch.action.update.UpdateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.ttjkst.ElasticMapperHolder;
 import com.ttjkst.elastic.exception.EsRuntimeException;
 @Component
 public class ElasticDao {
@@ -30,7 +31,7 @@ public class ElasticDao {
 				throw new IllegalArgumentException("ctx must not be null !");
 			}
 			if(elasticUitl.getProp().isEsIgnoreIndex()){
-				createIndex();
+				createIndex(index,type);
 			}
 			Map<String, String> source = new HashMap<>();
 			source = mapper.apply(source);
@@ -100,8 +101,8 @@ public class ElasticDao {
 			return null;
 		}
 		
-		private boolean isIndexExists(){
-			IndicesExistsRequest request = new IndicesExistsRequest(elasticUitl.getProp().getEsIndex());
+		private boolean isIndexExists(String index,String type){
+			IndicesExistsRequest request = new IndicesExistsRequest(index);
 			IndicesExistsResponse response = null;
 			try {
 				response = elasticUitl.getTransportClient().admin().indices().exists(request).actionGet();
@@ -112,24 +113,14 @@ public class ElasticDao {
 			return response.isExists();
 		}
 		//not good need update
-		private void createIndex(){
-			if(!isIndexExists()){
-				CreateIndexRequest createIndexRequest = new CreateIndexRequest(elasticUitl.getProp().getEsIndex());
-				Map<String, Object> source = new HashMap<>();
-				Map<String, String> setting = new HashMap<>();
-				setting.put("type", "string");
-				setting.put("store", "true");
-				setting.put("index", "not_analyzed");
-				source.put("author", setting);
-				source.put("title", setting);
-				setting.put("type","string");
-				source.put("create_time", setting);			
-				Map<String, Object> prop = new HashMap<>();
-				prop.put("properties", source);
-				createIndexRequest.mapping(elasticUitl.getProp().getEsType(), prop);
+		private void createIndex(String index,String type){
+			if(!isIndexExists(index,type)){
+				CreateIndexRequest createIndexRequest = new CreateIndexRequest(index);			
+				Map<String, Object> prop = ElasticMapperHolder.getMapperInfo(index, type);
+				createIndexRequest.mapping(type, prop);
 				CreateIndexResponse response = elasticUitl.getTransportClient().admin().indices().create(createIndexRequest).actionGet();
 				if(!response.isAcknowledged()){
-					throw  new EsRuntimeException("create "+elasticUitl.getProp().getEsIndex()+" error");
+					throw  new EsRuntimeException("create "+index+" error");
 				}
 			}
 		}

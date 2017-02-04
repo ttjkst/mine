@@ -11,7 +11,7 @@ import com.ttjkst.dao.KindDAO;
 import com.ttjkst.service.IKindService;
 @Transactional
 @Service
-public class KindsService implements IKindService{
+public class KindService implements IKindService{
 	
 	@Autowired
 	private KindDAO dao;

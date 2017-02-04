@@ -25,9 +25,7 @@ public class ABService implements IAboutWhatService{
 	public List<AboutWhat> getAllAboutWhat() {
 		List<AboutWhat> abs = new ArrayList<AboutWhat>();
 		Iterator<AboutWhat> itera = dao.findAll().iterator();
-		while(itera.hasNext()){
-			abs.add(itera.next());
-		}
+		itera.forEachRemaining(x->abs.add(x));//java 8 
 		return abs;
 	}
 

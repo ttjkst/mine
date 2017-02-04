@@ -18,7 +18,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 @Entity
 @Table(name="kind")
-public class Kinds implements Serializable {
+public class Kind implements Serializable {
 	/**
 	 * 
 	 */
@@ -26,50 +26,50 @@ public class Kinds implements Serializable {
 	@Id
 	@Column(name="id")
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Long kId;
+	private Long id;
 	
 	@Column(name="name",nullable=false,length=60)
-	private String kName;
+	private String name;
 	
 	
 	@JoinColumn(name="ab_id")
-	@ManyToOne(fetch=FetchType.EAGER,targetEntity=AboutWhats.class,cascade=CascadeType.PERSIST)
-	private AboutWhats aboutwhat;
+	@ManyToOne(fetch=FetchType.EAGER,targetEntity=AboutWhat.class,cascade=CascadeType.PERSIST)
+	private AboutWhat aboutwhat;
 
 	/**
 	 * @return the kId
 	 */
-	public Long getkId() {
-		return kId;
+	public Long getId() {
+		return id;
 	}
 
 	/**
 	 * @param kId
 	 *            the kId to set
 	 */
-	public void setkId(Long kId) {
-		this.kId = kId;
+	public void setId(Long kId) {
+		this.id = kId;
 	}
 
 	/**
 	 * @return the kName
 	 */
-	public String getkName() {
-		return kName;
+	public String getName() {
+		return name;
 	}
 
 	/**
 	 * @param kName
 	 *            the kName to set
 	 */
-	public void setkName(String kName) {
-		this.kName = kName;
+	public void setName(String kName) {
+		this.name = kName;
 	}
 
 	/**
 	 * @return the aboutwhat
 	 */
-	public AboutWhats getAboutwhat() {
+	public AboutWhat getAboutwhat() {
 		return aboutwhat;
 	}
 
@@ -77,18 +77,18 @@ public class Kinds implements Serializable {
 	 * @param aboutwhat
 	 *            the aboutwhat to set
 	 */
-	public void setAboutwhat(AboutWhats aboutwhat) {
+	public void setAboutwhat(AboutWhat aboutwhat) {
 		this.aboutwhat = aboutwhat;
 	}
 
-	public Kinds(Long kId, String kName, AboutWhats aboutwhat) {
+	public Kind(Long kId, String kName, AboutWhat aboutwhat) {
 		super();
-		this.kId = kId;
-		this.kName = kName;
+		this.id = kId;
+		this.name = kName;
 		this.aboutwhat = aboutwhat;
 	}
 
-	public Kinds() {
+	public Kind() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
@@ -100,7 +100,7 @@ public class Kinds implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		return "Kinds [kId=" + kId + ", kName=" + kName + ", aboutwhat="
+		return "Kinds [kId=" + id + ", kName=" + name + ", aboutwhat="
 				+ aboutwhat + "]";
 	}
 

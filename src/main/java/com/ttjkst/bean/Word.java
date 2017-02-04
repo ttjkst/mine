@@ -13,8 +13,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 @Entity
@@ -29,25 +27,24 @@ public class Word implements Serializable {
 	@Column(name="id")
 	private String id;
 	
-	@Column(name="title",length=60)
+	@Transient
 	private String title;
 	@Transient
 	private String content;
 	
 	@JoinColumn(name="kind_id")
-	@ManyToOne(fetch=FetchType.EAGER,targetEntity=Kinds.class,cascade=CascadeType.PERSIST)
-	private Kinds kind;
+	@ManyToOne(fetch=FetchType.EAGER,targetEntity=Kind.class,cascade=CascadeType.PERSIST)
+	private Kind kind;
 	@Transient
 	private String author;
 	
-	@Column(name="hasNoProcessLw")
+	@Transient
 	private boolean hasNoProcessLw;
 	
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="create_time")
+	@Transient
 	private Date createTime;
 	
-	@Column(name="canshow")
+	@Transient
 	private boolean canShow;
 	@Column(name="readed_time",length=100)
 	private Long readedTimes;
@@ -61,7 +58,9 @@ public class Word implements Serializable {
 	
 
 	public Word() {
-		super();
+		this.createTime = new Date();
+		this.hasNoProcessLw = true;
+		this.readedTimes  = 0L;
 	}
 
 
@@ -98,12 +97,12 @@ public class Word implements Serializable {
 
 
 
-	public Kinds getKind() {
+	public Kind getKind() {
 		return kind;
 	}
 
 
-	public void setKind(Kinds kind) {
+	public void setKind(Kind kind) {
 		this.kind = kind;
 	}
 
@@ -160,6 +159,14 @@ public class Word implements Serializable {
 
 	public void setHasNoProcessLw(boolean hasNoProcessLw) {
 		this.hasNoProcessLw = hasNoProcessLw;
+	}
+
+
+	@Override
+	public String toString() {
+		return "Word [id=" + id + ", title=" + title + ", content=" + content + ", kind=" + kind + ", author=" + author
+				+ ", hasNoProcessLw=" + hasNoProcessLw + ", createTime=" + createTime + ", canShow=" + canShow
+				+ ", readedTimes=" + readedTimes + ", leaveWords=" + leaveWords + "]";
 	}
 	
 	

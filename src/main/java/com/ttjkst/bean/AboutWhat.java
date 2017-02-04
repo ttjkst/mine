@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 @Entity
 @Table(name="about_what")
-public class AboutWhats implements Serializable {
+public class AboutWhat implements Serializable {
 	/**
 	 * 
 	 */
@@ -22,7 +22,7 @@ public class AboutWhats implements Serializable {
 	@Id
 	@Column(name="id")
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Long Aid;
+	private Long id;
 	
 	@Column(length=40)
 	private String name;
@@ -33,16 +33,16 @@ public class AboutWhats implements Serializable {
 	/**
 	 * @return the aid
 	 */
-	public Long getAid() {
-		return Aid;
+	public Long getId() {
+		return id;
 	}
 
 	/**
 	 * @param aid
 	 *            the aid to set
 	 */
-	public void setAid(Long aid) {
-		Aid = aid;
+	public void setId(Long aid) {
+		id = aid;
 	}
 
 	/**
@@ -60,13 +60,13 @@ public class AboutWhats implements Serializable {
 		this.name = name;
 	}
 
-	public AboutWhats(Long aid, String name) {
+	public AboutWhat(Long aid, String name) {
 		super();
-		Aid = aid;
+		id = aid;
 		this.name = name;
 	}
 
-	public AboutWhats() {
+	public AboutWhat() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
@@ -78,7 +78,7 @@ public class AboutWhats implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		return "AboutWhats [Aid=" + Aid + ", name=" + name + "]";
+		return "AboutWhats [Aid=" + id + ", name=" + name + "]";
 	}
 
 }

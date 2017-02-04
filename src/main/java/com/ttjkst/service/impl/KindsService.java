@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ttjkst.bean.Kinds;
+import com.ttjkst.bean.Kind;
 import com.ttjkst.dao.KindDAO;
 import com.ttjkst.service.IKindService;
 @Transactional
@@ -17,7 +17,7 @@ public class KindsService implements IKindService{
 	private KindDAO dao;
 	
 
-	public List<Kinds> getkindsList(String msg) {
+	public List<Kind> getkindsList(String msg) {
 		
 		return dao.findByAbName(msg);
 	}
@@ -27,11 +27,11 @@ public class KindsService implements IKindService{
 		return result==0?false:true;
 	}
 
-	public Kinds getkindbyNameAndAb(String msg, String parentMsg) {
+	public Kind getkindbyNameAndAb(String msg, String parentMsg) {
 		return dao.getItBy2Name(msg, parentMsg);
 	}
 
-	public Kinds savekinds(Kinds kind) {
+	public Kind savekinds(Kind kind) {
 		
 		return dao.save(kind);
 	}

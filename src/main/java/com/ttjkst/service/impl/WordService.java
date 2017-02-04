@@ -35,8 +35,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ttjkst.bean.AboutWhats;
-import com.ttjkst.bean.Kinds;
+import com.ttjkst.bean.AboutWhat;
+import com.ttjkst.bean.Kind;
 import com.ttjkst.bean.LeaveWords;
 import com.ttjkst.bean.Word;
 import com.ttjkst.dao.ABDAO;
@@ -97,8 +97,7 @@ public class WordService implements IWordsService{
 						  x.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
 						  x.setFrom(page.getOffset());
 						  x.setSize(page.getPageSize());
-						  
-						  x.setQuery(QueryBuilders.matchQuery("content", searchName));
+						  x.setQuery(QueryBuilders.multiMatchQuery(searchName, "content","author","title"));
 						  BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 						  List<QueryBuilder> musts = queryBuilder.must();
 						  musts.add(QueryBuilders.matchQuery("kindName", searchName));
@@ -122,8 +121,8 @@ public class WordService implements IWordsService{
 					CriteriaQuery<?> query, CriteriaBuilder cb) {
 					Predicate all = null;
 					//all this is common use
-					Path<Kinds> kindPath = root.get("wKind");
-					Path<AboutWhats> aboutWhatPath = kindPath.get("aboutwhat");
+					Path<Kind> kindPath = root.get("wKind");
+					Path<AboutWhat> aboutWhatPath = kindPath.get("aboutwhat");
 					Expression<String> nameEx = aboutWhatPath.get("name");
 					
 					Expression<Long> idEx  =  root.get("wId");
@@ -178,21 +177,25 @@ public class WordService implements IWordsService{
 		if(srcWord==null){
 			elastic.update(elasticUitl.getProp().getEsIndex(), elasticUitl.getProp().getEsType(), new HashMap<>(), word.getId(), x->{
 				Map<String, String> map = new HashMap<>();
-				map.put("kindName", word.getKind().getkName());
+				map.put("kindName", word.getKind().getName());
 				map.put("aboutWhatName", word.getKind().getAboutwhat().getName());
 				map.put("author", word.getAuthor());
 				map.put("title", word.getTitle());
+				map.put("hasNoProcessLw", word.isHasNoProcessLw()+"");
+				map.put("canshow", word.isCanShow()+"");
 			});
 		}else{
 			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(srcWord));
 			String content = bufferedReader.lines().reduce("", (x1,x2)->{return x1+x2;});
 			elastic.update(elasticUitl.getProp().getEsIndex(), elasticUitl.getProp().getEsType(), new HashMap<>(), word.getId(), x->{
 				Map<String, String> map = new HashMap<>();
-				map.put("kindName", word.getKind().getkName());
+				map.put("kindName", word.getKind().getName());
 				map.put("aboutWhatName", word.getKind().getAboutwhat().getName());
 				map.put("author", word.getAuthor());
 				map.put("title", word.getTitle());
 				map.put("content", content);
+				map.put("hasNoProcessLw", word.isHasNoProcessLw()+"");
+				map.put("canshow", word.isCanShow()+"");
 			});
 		}		
 		dao.save(word);
@@ -206,8 +209,8 @@ public class WordService implements IWordsService{
 			public Predicate toPredicate(Root<Word> root, CriteriaQuery<?> query,
 					CriteriaBuilder cb) {
 				if(aboutWhatName!=null&&!aboutWhatName.isEmpty()){
-					Path<Kinds> kindPath = root.get("wKind");
-					Path<AboutWhats> abPath = kindPath.get("aboutwhat");
+					Path<Kind> kindPath = root.get("wKind");
+					Path<AboutWhat> abPath = kindPath.get("aboutwhat");
 					Expression<String> nameEx = abPath.get("name");
 					return cb.equal(nameEx, aboutWhatName);
 				}else{
@@ -224,28 +227,69 @@ public class WordService implements IWordsService{
 		//from dataSource
 		Word data =  dao.findOne(id);
 		elastic.get(elasticUitl.getProp().getEsIndex(), elasticUitl.getProp().getEsType(), id, x->{
-			data.getAuthor();	
+			data.getAuthor();
+			Map<String, Object> map = x.getSourceAsMap();
+			String title = map.get("title").toString();
+			String author = map.get("author").toString();
+			String createTimeStr = map.get("create_time").toString();
+			String content = map.get("content").toString();
+			data.setAuthor(author);
+			data.setCreateTime(new Date(Long.parseLong(createTimeStr)));
+			data.setTitle(title);
+			data.setContent(content);
 		});
-		return dao.findOne(id);
+		return data;
 	}
 	
 	
-	//not finished
+	private void checkWord(Word word){
+		if(word.getTitle()==null){
+			throw new IllegalArgumentException("word title must not be null!");
+		}
+		if(word.getAuthor()==null){
+			throw new IllegalArgumentException("word author must not be null!");
+		}
+		if(word.getCreateTime()==null){
+			throw new IllegalArgumentException("word createTime must not be null!");
+		}
+	}
+	
+	//finished ?
 	public Word saveit(Word word, InputStream srcWord, InputStream srcIntor) throws ServiceException {
+		checkWord(word);
+		
 		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(srcWord));
 		String content = bufferedReader.lines().reduce("", (x1,x2)->{return x1+x2;});
 		elastic.presist(elasticUitl.getProp().getEsIndex(), elasticUitl.getProp().getEsType(), new HashMap<>(), mapper->{
-			mapper.put("kindName", word.getKind().getkName());
+			mapper.put("kindName", word.getKind().getName());
 			mapper.put("aboutWhatName", word.getKind().getAboutwhat().getName());
 			mapper.put("author", word.getAuthor());
 			mapper.put("title", word.getTitle());
 			mapper.put("content", content);
+			mapper.put("hasNoProcessLw", word.isHasNoProcessLw()+"");
+			mapper.put("canshow", word.isCanShow()+"");
 			return mapper;
 		}, then->{
 			String id = then.get("id").toString();
 			word.setId(id);
 			return word;
 		});
+		String aboutWhatName = word.getKind().getAboutwhat().getName();
+		String kName = word.getKind().getName();
+		Kind kind = kDao.getItBy2Name(kName, aboutWhatName);
+		if(kind==null){
+			AboutWhat aboutWhat = abDao.getItByName(aboutWhatName);
+			if(aboutWhat==null){
+				aboutWhat = new AboutWhat();
+				aboutWhat.setName(aboutWhatName);
+				aboutWhat = abDao.save(aboutWhat);
+			}
+			kind = new Kind();
+			kind.setName(kName);
+			kind.setAboutwhat(aboutWhat);
+			kind = kDao.save(kind);
+		}
+		word.setKind(kind);
 		this.dao.save(word);
 		
 		return word;
@@ -262,10 +306,13 @@ public class WordService implements IWordsService{
 				String title = x.getFields().get("title").getValues().get(0).toString();
 				String author = x.getFields().get("author").getValues().get(0).toString();
 				String create_time = x.getFields().get("create_time").getValues().get(0).toString();
-				
+				String canshowStr   = x.getFields().get("canshow").getValues().get(0).toString();
+				String hasNoProcessStr = x.getFields().get("hasNoProcess").getValues().get(0).toString();
 				word.setTitle(title);
 				word.setAuthor(author);
 				word.setCreateTime(new Date(Long.parseLong(create_time)));
+				word.setCanShow(Boolean.parseBoolean(canshowStr));
+				word.setHasNoProcessLw(Boolean.parseBoolean(hasNoProcessStr));
 				list.add(word);
 			});
 			Map<String, Object> map = new HashMap<String, Object>();
@@ -327,7 +374,7 @@ public class WordService implements IWordsService{
 				
 				@Override
 				public Sort getSort() {
-					throw new UnsupportedOperationException("no overide");
+					throw new UnsupportedOperationException("no override");
 				}
 				
 				@Override
@@ -353,7 +400,7 @@ public class WordService implements IWordsService{
 				
 				@Override
 				public <S> Page<S> map(Converter<? super Word, ? extends S> converter) {
-					throw new UnsupportedOperationException("no overide");
+					throw new UnsupportedOperationException("no override");
 				}
 				
 				@Override

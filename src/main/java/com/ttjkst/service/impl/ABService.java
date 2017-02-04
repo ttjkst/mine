@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ttjkst.bean.AboutWhats;
+import com.ttjkst.bean.AboutWhat;
 import com.ttjkst.dao.ABDAO;
 import com.ttjkst.service.IAboutWhatService;
 
@@ -22,9 +22,9 @@ public class ABService implements IAboutWhatService{
 	@Autowired
 	private ABDAO dao;
 	
-	public List<AboutWhats> getAllAboutWhat() {
-		List<AboutWhats> abs = new ArrayList<AboutWhats>();
-		Iterator<AboutWhats> itera = dao.findAll().iterator();
+	public List<AboutWhat> getAllAboutWhat() {
+		List<AboutWhat> abs = new ArrayList<AboutWhat>();
+		Iterator<AboutWhat> itera = dao.findAll().iterator();
 		while(itera.hasNext()){
 			abs.add(itera.next());
 		}
@@ -36,11 +36,11 @@ public class ABService implements IAboutWhatService{
 		return result==0?false:true;
 	}
 
-	public AboutWhats newAboutWhat(AboutWhats abWhats) {
+	public AboutWhat newAboutWhat(AboutWhat abWhats) {
 		return dao.save(abWhats);
 	}
 
-	public AboutWhats getItByName(String name) {
+	public AboutWhat getItByName(String name) {
 		return dao.getItByName(name);
 	}
 

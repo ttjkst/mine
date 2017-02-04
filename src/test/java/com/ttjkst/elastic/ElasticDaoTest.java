@@ -1,16 +1,8 @@
 package com.ttjkst.elastic;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 
-import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchType;
-import org.elasticsearch.cluster.metadata.AliasMetaData.Builder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.junit.Test;
 import org.junit.runner.RunWith;

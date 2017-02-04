@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.ttjkst.bean.AboutWhats;
-import com.ttjkst.bean.Kinds;
+import com.ttjkst.bean.AboutWhat;
+import com.ttjkst.bean.Kind;
 import com.ttjkst.bean.Word;
 import com.ttjkst.service.IAboutWhatService;
 import com.ttjkst.service.IKindService;
@@ -39,7 +39,7 @@ public class Edit implements ServletContextAware{
 	public IKindService kindService ;
 	@ResponseBody
 	@RequestMapping(value="/getAboutwhat")
-	public List<AboutWhats> getAbouts(){
+	public List<AboutWhat> getAbouts(){
 		return this.aboutWhatService.getAllAboutWhat();
 	}
 	@RequestMapping(value="/init")
@@ -48,7 +48,7 @@ public class Edit implements ServletContextAware{
 	}
 	@ResponseBody
 	@RequestMapping("/getKindsByMsg")
-	public List<Kinds> getKind(@RequestParam("msg")String msg){
+	public List<Kind> getKind(@RequestParam("msg")String msg){
 		return this.kindService.getkindsList(msg);
 	}
 	
@@ -63,9 +63,9 @@ public class Edit implements ServletContextAware{
 			@RequestParam("msg")String msg){
 		
 		
-		Kinds kind = new Kinds();
-		kind.setkName(kindName);
-		AboutWhats aboutWhat = new AboutWhats();
+		Kind kind = new Kind();
+		kind.setName(kindName);
+		AboutWhat aboutWhat = new AboutWhat();
 		aboutWhat.setName(aboutWhatName);
 		kind.setAboutwhat(aboutWhat);
 		Word word = new Word();
@@ -127,9 +127,9 @@ public class Edit implements ServletContextAware{
 		
 		
 		
-		Kinds kind = new Kinds();
-		kind.setkName(kindName);
-		AboutWhats aboutWhat = new AboutWhats();
+		Kind kind = new Kind();
+		kind.setName(kindName);
+		AboutWhat aboutWhat = new AboutWhat();
 		aboutWhat.setName(aboutWhatName);
 		kind.setAboutwhat(aboutWhat);
 		Word word = new Word();

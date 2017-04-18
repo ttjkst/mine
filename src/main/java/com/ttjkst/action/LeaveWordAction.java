@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
 import com.ttjkst.bean.LeaveWords;
-import com.ttjkst.bean.Word;
+import com.ttjkst.bean.Essay;
 import com.ttjkst.service.ILeaveWordsService;
 @SessionAttributes("word")
 @Controller
@@ -29,7 +29,7 @@ public class LeaveWordAction {
 	
 	
 	@RequestMapping("/saveLeaveWord")
-	public ResponseEntity<Object> saveLeaveWords(@RequestParam("word")Word word,
+	public ResponseEntity<Object> saveLeaveWords(@RequestParam("word")Essay word,
 			@RequestParam("qq")String qq,
 			@RequestParam("sayWhat")String sayWhat,
 			@RequestParam("email")String email,

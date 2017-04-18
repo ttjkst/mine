@@ -5,10 +5,14 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import com.ttjkst.boot.config.BeforeSpringDo;
+import com.ttjkst.webConfig.AllowALl;
 
 
 @SpringBootApplication
@@ -30,5 +34,14 @@ public class BootApplication extends SpringBootServletInitializer{
 		return builder.sources(BootApplication.class);
 	}
 	
-	
+	@Configuration
+	protected class webConfig extends WebMvcConfigurerAdapter{
+
+		@Override
+		public void addInterceptors(InterceptorRegistry registry) {
+			registry.addInterceptor(new AllowALl());
+			super.addInterceptors(registry);
+		}
+		
+	} 
 }

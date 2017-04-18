@@ -1,6 +1,5 @@
 package com.ttjkst.elastic;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
@@ -11,10 +10,10 @@ import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,26 +25,23 @@ public class ElasticDao {
 		@Autowired
 		private ElasticUitl elasticUitl;
 
-		public <T> T presist(String index,String type,Map<String, Object> ctx,Function<Map<String, String> , Map<String, String>> mapper,Function<Map<String, Object>, T> then){
-			if(ctx==null){
-				throw new IllegalArgumentException("ctx must not be null !");
-			}
+		public <T> void presist(String index,String type,Consumer<IndexRequestBuilder> mapper,Consumer<IndexResponse> then){
 			if(elasticUitl.getProp().isEsIgnoreIndex()){
 				createIndex(index,type);
 			}
-			Map<String, String> source = new HashMap<>();
-			source = mapper.apply(source);
-			IndexResponse indexResponse;
+			IndexRequestBuilder prepareIndex= null;
+			
 			try {
-				indexResponse = elasticUitl.getTransportClient().prepareIndex(index,
-						type).setSource(source).get();
-				ctx.put("id", indexResponse.getId());
+				prepareIndex = elasticUitl.getTransportClient().prepareIndex(index,
+						type);
+				 mapper.accept(prepareIndex);
+				 IndexResponse indexResponse = prepareIndex.get();
+				 then.accept(indexResponse); 
 			} catch (Exception e) {
 				e.printStackTrace();
 			}finally {
 				elasticUitl.close();
 			}
-			return then.apply(ctx);
 		}
 		
 		
@@ -85,10 +81,8 @@ public class ElasticDao {
 		
 		
 		
-		public Map<String, Object> search(String index,String type,Map<String,Object> ctx,Consumer<SearchRequestBuilder> builder,Function<SearchResponse, Map<String, Object>> resultMapper){
-			if(ctx==null){
-				throw new IllegalArgumentException("ctx must not be null !");
-			}
+		public Map<String, Object> search(String index,String type,Consumer<SearchRequestBuilder> builder,Function<SearchResponse, Map<String, Object>> resultMapper){
+
 			try {
 				SearchRequestBuilder base = elasticUitl.getTransportClient().prepareSearch(index).setTypes(type);
 				builder.accept(base);

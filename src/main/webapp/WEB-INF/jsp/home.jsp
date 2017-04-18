@@ -1,27 +1,3 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-<!DOCTYPE html>
-<html>
-	<head>
-		<meta charset="utf-8" />
-		<link rel="stylesheet" href="${pageContext.request.contextPath}/css/bootstrap-theme.min.css" />
-		<link rel="stylesheet" href="${pageContext.request.contextPath}/css/bootstrap.min.css" />
-		<link rel="stylesheet" href="${pageContext.request.contextPath}/css/mycss.css" />
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.min.js" ></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap.min.js" ></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/react/built/common.js"></script>
-		 
-		<title></title>
-		<script type="text/javascript">
-		var webRoot = "${pageContext.request.contextPath}/";
-		</script>
-	</head>
-	  <body class="base_background">
-	  	<div id="modal"></div>
-    	<div id="head"></div>
-    	<br/>
-    	<div id="context"></div>
-    	<div id="button"></div>
-  </body>
- <script type="text/javascript" src="${pageContext.request.contextPath}/js/react/built/home.js"></script>
-</html>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script type="text/javascript">var webRoot="${pageContext.request.contextPath}"</script><link rel="shortcut icon" href="/favicon.ico"><title>React App</title><link href="${pageContext.request.contextPath}/home/css/main.7c1298c7.css" rel="stylesheet"></head><body><div id="modal"></div><div id="root"></div><div id="main" style="background-color:#e7e7e7"></div><div id="foo"></div><script type="text/javascript" src="${pageContext.request.contextPath}/home/js//main.149adec3.js"></script></body></html>

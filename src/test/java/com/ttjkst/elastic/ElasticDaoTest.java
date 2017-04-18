@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.ttjkst.BootApplication;
-import com.ttjkst.bean.Word;
+import com.ttjkst.bean.Essay;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes=BootApplication.class)
 public class ElasticDaoTest {
@@ -65,23 +65,23 @@ public class ElasticDaoTest {
 //	  });
 //  }
   
-  @Test
-  public void delete(){
-	  index = elasticUitl.getProp().getEsIndex();
-	  type  = elasticUitl.getProp().getEsType();
-	  dao.search(index, type, new HashMap<>(), base->{
-		  base.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
-		  base.setQuery(QueryBuilders.matchQuery("content", "finibus"));
-		  }, mapper->{
-		  System.out.println(mapper.getHits().getTotalHits());
-		  mapper.getHits().forEach(x->{
-			 dao.delete(index, type, x.getId());
-		  });
-		 return null; 
-	  });
-	  
-	  
-  }
+//  @Test
+//  public void delete(){
+//	  index = elasticUitl.getProp().getEsIndex();
+//	  type  = elasticUitl.getProp().getEsType();
+//	  dao.search(index, type, new HashMap<>(), base->{
+//		  base.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
+//		  base.setQuery(QueryBuilders.matchQuery("content", "finibus"));
+//		  }, mapper->{
+//		  System.out.println(mapper.getHits().getTotalHits());
+//		  mapper.getHits().forEach(x->{
+//			 dao.delete(index, type, x.getId());
+//		  });
+//		 return null; 
+//	  });
+//	  
+//	  
+//  }
   
   
 }

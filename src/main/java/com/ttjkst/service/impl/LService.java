@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ttjkst.bean.LeaveWords;
-import com.ttjkst.bean.Word;
+import com.ttjkst.bean.Essay;
 import com.ttjkst.dao.LWDAO;
 import com.ttjkst.service.ILeaveWordsService;
 @Service
@@ -59,7 +59,7 @@ public class LService implements ILeaveWordsService{
 					CriteriaBuilder cb) {
 				Predicate all = null;
 				if(wordId!=null){
-					Path<Word> wordPath = root.get("leaveFor");
+					Path<Essay> wordPath = root.get("leaveFor");
 					Expression<Long> wordIdEx = wordPath.get("wId");
 					Predicate p1 = cb.equal(wordIdEx, wordId);
 					all = cb.and(p1);

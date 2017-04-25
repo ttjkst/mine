@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.ttjkst.bean.AboutWhat;
 import com.ttjkst.bean.Kind;
@@ -34,7 +35,7 @@ import com.ttjkst.service.exception.ServiceException;
 
 @RestController
 @RequestMapping("/essay")
-public class EssayAction implements ServletContextAware{
+public class EssayAction{
 
 	
 	@Autowired
@@ -42,9 +43,9 @@ public class EssayAction implements ServletContextAware{
 
 	private String allow = "*";
 	private HttpHeaders responseHeaders = new HttpHeaders();
-//	{
-//		responseHeaders.add("Access-Control-Allow-Origin", "*");
-//	}
+	{
+		responseHeaders.add("Access-Control-Allow-Origin", "*");
+	}
 	@Autowired
 	public IAboutWhatService aboutWhatService;
 	@Autowired
@@ -114,6 +115,39 @@ public class EssayAction implements ServletContextAware{
 		Essay body = this.wordsService.getItbyId(id);
 		return new ResponseEntity<Essay>(body, responseHeaders, HttpStatus.OK);
 	}
+	@RequestMapping("/update/")
+	public ResponseEntity<?> updateEssay(
+			@RequestParam("id")		String id,
+			@RequestParam("author")	String author,
+			@RequestParam("content")String content,
+			@RequestParam("title")	String title,
+			@RequestParam("tags")	String tags){
+		Essay essay = new Essay();
+		essay.setId(id);
+		essay.setAuthor(author);
+		essay.setContent(content);
+		essay.setTitle(title);
+		if(tags!=null&&!tags.isEmpty()){
+			Arrays.asList(tags.split(",")).forEach(x->{
+				if(!x.trim().isEmpty()){
+					essay.getTags().add(x);
+				}
+			});
+		}
+		Object body = null;
+		try {
+			this.wordsService.update(essay);
+		} catch (ServiceException e) {
+			e.printStackTrace();
+			body = e.getMessage();
+		}
+		if(body==null){
+			body = true;
+		}
+		return new ResponseEntity<>(body, responseHeaders,body.equals(true)?HttpStatus.OK
+				:HttpStatus.BAD_REQUEST);	
+	}
+	
 	//need fixed
 //	@ResponseBody
 //	@RequestMapping(value="/saveWord")
@@ -225,8 +259,8 @@ public class EssayAction implements ServletContextAware{
 //			 
 //		return true;
 //	}
-	@RequestMapping("/delete")
-	public ResponseEntity<String> delete(@RequestParam("id")String id){
+	@RequestMapping("/delete/{id}")
+	public ResponseEntity<String> delete(@PathVariable("id")String id){
 		assertNotNull(id);
 		if(id.equals(null)){
 			throw new IllegalArgumentException("the args must has a  id,but it do not has one");
@@ -236,16 +270,12 @@ public class EssayAction implements ServletContextAware{
 		} catch (ServiceException e) {
 			
 			e.printStackTrace();
-			return new ResponseEntity<String>(HttpStatus.EXPECTATION_FAILED);
+			return new ResponseEntity<String>("",responseHeaders,HttpStatus.EXPECTATION_FAILED);
 		}
-		return new ResponseEntity<String>(HttpStatus.OK);
+		return new ResponseEntity<String>("",responseHeaders,HttpStatus.OK);
 	}
-	
-	//inject ServletContext 
-	//init webRoot
-	public void setServletContext(ServletContext servletContext) {
-		System.out.println(servletContext.getRealPath("/"));
-	 System.setProperty("LocalWebRoot", servletContext.getRealPath("/"));	
-	}	
-	
+	@RequestMapping("/manager")
+	public ModelAndView gotoManger(){
+		return new ModelAndView("manager");
+	}
 }

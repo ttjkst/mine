@@ -29,7 +29,7 @@ public class Essay implements Serializable {
 	
 	@Transient
 	private Set<String> tags;  
-	@Transient
+	@Column(name="title")
 	private String title;
 	@Transient
 	private String content;

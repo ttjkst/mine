@@ -106,12 +106,18 @@ public class EssayService implements IEssayService{
     //not finished  kind and aboutWhat
 	public Essay update(Essay word)
 			throws ServiceException {
-			elastic.update(elasticUitl.getProp().getEsIndex(), elasticUitl.getProp().getEsType(), new HashMap<>(), word.getId(), x->{
+		List<Essay> itByTitle = dao.getItByTitle2(word.getId(),word.getTitle());
+		if(itByTitle.size()!=0){
+			throw new ServiceException("title is not unique");
+		}
+		elastic.update(elasticUitl.getProp().getEsIndex(), elasticUitl.getProp().getEsType(),
+				new HashMap<>(), word.getId(), x->{
 				Map<String, String> map = new HashMap<>();
 				map.put("author", word.getAuthor());
 				map.put("title", word.getTitle());
-				map.put("canshow", word.isCanShow()+"");
-			});
+				map.put("content", word.getContent());
+				x.doc(map);
+		});
 				
 		dao.save(word);
 		return word;
@@ -141,7 +147,8 @@ public class EssayService implements IEssayService{
 	public Essay getItbyId(String id) {
 		//from dataSource
 		Essay data =  dao.findOne(id);
-		elastic.get(elasticUitl.getProp().getEsIndex(), elasticUitl.getProp().getEsType(), id, x->{
+		elastic.get(elasticUitl.getProp().getEsIndex(),
+				elasticUitl.getProp().getEsType(), id, x->{
 			Map<String, Object> source = x.getSource();
 			String title = source.get("title").toString();
 			String content = source.get("content").toString();
@@ -168,6 +175,10 @@ public class EssayService implements IEssayService{
 	//finished ?
 	public Essay saveit(Essay word) throws ServiceException {
 		checkWord(word);
+		List<Essay> itByTitle = dao.getItByTitle(word.getTitle());
+		if(itByTitle.size()!=0){
+			throw new ServiceException("title is not unique");
+		}
 		elastic.presist(elasticUitl.getProp().getEsIndex(), elasticUitl.getProp().getEsType(), mapper->{
 			Map<String, Object> source = new HashMap<>();
 			source.put("title", word.getTitle());
@@ -195,7 +206,11 @@ public class EssayService implements IEssayService{
 				String content = source.get("content").toString();
 				String author  = source.get("author").toString();
 				word.setAuthor(author);
+				if(content.length()<=300){
+					word.setContent(content);
+				}else{
 				word.setContent(content.substring(0, 300));
+				}
 				word.setTitle(title);
 				word.setId(x.getId());
 				list.add(word);

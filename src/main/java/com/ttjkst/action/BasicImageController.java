@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 @RestController
+@RequestMapping("/basicImage")
 public class BasicImageController {
 	
 	private String dir = "C:/Users/ttjkst/Desktop/fileData";

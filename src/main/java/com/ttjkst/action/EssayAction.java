@@ -39,7 +39,7 @@ public class EssayAction{
 
 	
 	@Autowired
-	public IEssayService wordsService;
+	public IEssayService essayService;
 
 	private String allow = "*";
 	private HttpHeaders responseHeaders = new HttpHeaders();
@@ -82,7 +82,7 @@ public class EssayAction{
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.add("Access-Control-Allow-Origin", "*");
 		try {
-			this.wordsService.saveit(essay);
+			this.essayService.saveit(essay);
 			return new ResponseEntity<Boolean>(true, responseHeaders,HttpStatus.OK);
 		} catch (ServiceException e) {
 			e.printStackTrace();
@@ -95,7 +95,7 @@ public class EssayAction{
 			@RequestParam("pageSize")int pageSize,@RequestParam("searchKey")String searchName){
 		//返回结果的容器
 		Map<String, Object> info = new HashMap<String, Object>();
-		Page<Essay> page = this.wordsService.findall(pageNo-1, pageSize,searchName);
+		Page<Essay> page = this.essayService.findall(pageNo-1, pageSize,searchName);
 		List<Essay> content = page.getContent();
 		long totalElements = page.getTotalElements();
 		long totalPages = totalElements/pageSize+ (totalElements%pageSize==0?0:1);
@@ -112,7 +112,7 @@ public class EssayAction{
 	}
 	@RequestMapping("/load/{id}")
 	public ResponseEntity<Essay> loadEssay(@PathVariable("id")String id){
-		Essay body = this.wordsService.getItbyId(id);
+		Essay body = this.essayService.getItbyId(id);
 		return new ResponseEntity<Essay>(body, responseHeaders, HttpStatus.OK);
 	}
 	@RequestMapping("/update/")
@@ -136,7 +136,7 @@ public class EssayAction{
 		}
 		Object body = null;
 		try {
-			this.wordsService.update(essay);
+			this.essayService.update(essay);
 		} catch (ServiceException e) {
 			e.printStackTrace();
 			body = e.getMessage();
@@ -202,9 +202,9 @@ public class EssayAction{
 	@RequestMapping(value="/verifyTitle")
 	public Boolean verifyTitle(@RequestParam("id")String id,@RequestParam("title")String title,@RequestParam("kindName")String kindName,@RequestParam("aboutWhatName")String  aboutWhatName,@RequestParam("webDoWhat")String webDoWhat){
 		if(id==null){
-			return !this.wordsService.hasWordByTitle(title, kindName, aboutWhatName);
+			return !this.essayService.hasWordByTitle(title, kindName, aboutWhatName);
 		}else{
-			Essay word = wordsService.getItbyId(id);
+			Essay word = essayService.getItbyId(id);
 			if(word.getTitle()!=null){
 				return word.getTitle().equals(title);
 			}
@@ -266,7 +266,7 @@ public class EssayAction{
 			throw new IllegalArgumentException("the args must has a  id,but it do not has one");
 		}
 		try {
-			this.wordsService.detele(id);
+			this.essayService.detele(id);
 		} catch (ServiceException e) {
 			
 			e.printStackTrace();

@@ -97,6 +97,9 @@ public class EssayService implements IEssayService{
 						  }
 						}, 
 					resultMapper);
+				if(map==null){
+					map = new HashMap<>();
+				}
 				map.put("pageable", page);
 		return this.map2page(map);
 	}
@@ -218,7 +221,6 @@ public class EssayService implements IEssayService{
 			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("content", list);
 			map.put("total", x1.getHits().getTotalHits());
-			System.out.println(map);
 			return map;
 		};
 		//

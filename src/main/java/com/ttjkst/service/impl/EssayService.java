@@ -1,11 +1,7 @@
 package com.ttjkst.service.impl;
 
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -18,13 +14,9 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
 
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
-import org.elasticsearch.common.bytes.BytesReference;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
@@ -38,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ttjkst.bean.AboutWhat;
 import com.ttjkst.bean.Kind;
-import com.ttjkst.bean.LeaveWords;
 import com.ttjkst.bean.Essay;
 import com.ttjkst.dao.EssayDAO;
 import com.ttjkst.elastic.ElasticDao;
@@ -46,7 +37,6 @@ import com.ttjkst.elastic.ElasticUitl;
 import com.ttjkst.service.IEssayService;
 import com.ttjkst.service.exception.ServiceException;
 
-import ch.qos.logback.classic.net.SyslogAppender;
 
 
 
@@ -54,7 +44,7 @@ import ch.qos.logback.classic.net.SyslogAppender;
 @Transactional
 public class EssayService implements IEssayService{
 	
-	
+	private static boolean hasCreate = false;
 	@Autowired
 	private ElasticUitl elasticUitl;
 	@Autowired
@@ -63,7 +53,11 @@ public class EssayService implements IEssayService{
 	
 	@Autowired
 	private ElasticDao elastic;
-	
+	private void init(){
+		hasCreate=true;
+		elastic.createIndex(elasticUitl.getProp().getEsIndex(), 
+				elasticUitl.getProp().getEsType());
+	}
 
 	public void detele(String id) throws ServiceException {
 		//elastic delete
@@ -93,7 +87,7 @@ public class EssayService implements IEssayService{
 						  if(searchName==null||searchName.isEmpty()){
 							  x.setQuery(QueryBuilders.matchAllQuery());
 						  }else{
-							  x.setQuery(QueryBuilders.multiMatchQuery(searchName, "content","author","title"));
+							  x.setQuery(QueryBuilders.matchQuery("content", searchName));
 						  }
 						}, 
 					resultMapper);
@@ -177,6 +171,7 @@ public class EssayService implements IEssayService{
 	
 	//finished ?
 	public Essay saveit(Essay word) throws ServiceException {
+		init();
 		checkWord(word);
 		List<Essay> itByTitle = dao.getItByTitle(word.getTitle());
 		if(itByTitle.size()!=0){

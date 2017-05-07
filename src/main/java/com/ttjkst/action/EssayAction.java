@@ -92,7 +92,7 @@ public class EssayAction{
 	@ResponseBody
 	@RequestMapping("/search")
 	public ResponseEntity<Map<String, Object>> search(@RequestParam("pageNo")int pageNo,
-			@RequestParam("pageSize")int pageSize,@RequestParam("searchKey")String searchName){
+			@RequestParam("pageSize")int pageSize,@RequestParam(value="searchKey",required=false)String searchName){
 		//返回结果的容器
 		Map<String, Object> info = new HashMap<String, Object>();
 		Page<Essay> page = this.essayService.findall(pageNo-1, pageSize,searchName);
@@ -115,7 +115,7 @@ public class EssayAction{
 		Essay body = this.essayService.getItbyId(id);
 		return new ResponseEntity<Essay>(body, responseHeaders, HttpStatus.OK);
 	}
-	@RequestMapping("/update/")
+	@RequestMapping("/update")
 	public ResponseEntity<?> updateEssay(
 			@RequestParam("id")		String id,
 			@RequestParam("author")	String author,

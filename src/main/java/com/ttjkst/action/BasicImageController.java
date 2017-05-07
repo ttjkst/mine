@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/basicImage")
 public class BasicImageController {
 	
-	private String dir = "C:/Users/ttjkst/Desktop/fileData";
+	@Value("${my.basic.imagefilePath}")
+	private String dir;
 	@RequestMapping("/save")
 	public ResponseEntity<String> save(@RequestParam("file") MultipartFile file){
 		String name =  UUID.randomUUID().toString()+file.getOriginalFilename();

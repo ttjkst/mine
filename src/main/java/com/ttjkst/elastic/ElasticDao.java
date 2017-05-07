@@ -107,7 +107,7 @@ public class ElasticDao {
 			return response.isExists();
 		}
 		//not good need update
-		private void createIndex(String index,String type){
+		public void createIndex(String index,String type){
 			if(!isIndexExists(index,type)){
 				CreateIndexRequest createIndexRequest = new CreateIndexRequest(index);			
 				Map<String, Object> prop = ElasticMapperHolder.getMapperInfo(index, type);

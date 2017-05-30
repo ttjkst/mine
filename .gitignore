@@ -1,0 +1,6 @@
+/target/
+/.apt_generated/
+./settings
+/.settings/
+/.factorypath
+/build/

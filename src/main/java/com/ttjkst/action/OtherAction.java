@@ -29,6 +29,11 @@ public class OtherAction {
 	{
 		responseHeaders.add("Access-Control-Allow-Origin", "*");
 	}
+	@RequestMapping("/me")
+	public ModelAndView home(){
+		return new ModelAndView("/home");
+	}
+	
 	
 	@RequestMapping(value = "/login")
 	public ModelAndView toHome(){

@@ -46,12 +46,6 @@ public class Essay implements Serializable {
 	@Column(name="readed_time",length=100)
 	private Long readedTimes;
 	
-	@OneToMany(mappedBy="leaveFor",cascade={CascadeType.REMOVE})
-	private Set<LeaveWords> leaveWords;
-
-	public Set<LeaveWords> getLeaveWords() {
-		return leaveWords;
-	}
 	
 
 	public Essay() {
@@ -140,8 +134,4 @@ public class Essay implements Serializable {
 		this.readedTimes = readedTimes;
 	}
 
-
-	public void setLeaveWords(Set<LeaveWords> leaveWords) {
-		this.leaveWords = leaveWords;
-	}
 }

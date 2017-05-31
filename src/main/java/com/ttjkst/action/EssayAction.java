@@ -2,14 +2,12 @@ package com.ttjkst.action;
 
 import static org.junit.Assert.assertNotNull;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,15 +19,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.ServletContextAware;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.ttjkst.bean.AboutWhat;
-import com.ttjkst.bean.Kind;
 import com.ttjkst.bean.Essay;
-import com.ttjkst.service.IAboutWhatService;
-import com.ttjkst.service.IKindService;
 import com.ttjkst.service.IEssayService;
 import com.ttjkst.service.exception.ServiceException;
 
@@ -41,30 +33,7 @@ public class EssayAction{
 	@Autowired
 	public IEssayService essayService;
 
-	private String allow = "*";
 	private HttpHeaders responseHeaders = new HttpHeaders();
-	{
-		responseHeaders.add("Access-Control-Allow-Origin", "*");
-	}
-	@Autowired
-	public IAboutWhatService aboutWhatService;
-	@Autowired
-	public IKindService kindService ;
-	@ResponseBody
-	@RequestMapping(value="/getAboutwhat")
-	public List<AboutWhat> getAbouts(){
-		return this.aboutWhatService.getAllAboutWhat();
-	}
-	@RequestMapping(value="/init")
-	public void init(){
-		
-	}
-	@ResponseBody
-	@RequestMapping("/getKindsByMsg")
-	public List<Kind> getKind(@RequestParam("msg")String msg){
-		return this.kindService.getkindsList(msg);
-	}
-	
 	
 	@RequestMapping("/save")
 	public ResponseEntity<Boolean> saveEassy(@RequestParam("content")String content,@RequestParam("title")String title,@RequestParam("author")String author,@RequestParam(value="tags",required=false)String tags){
@@ -100,11 +69,6 @@ public class EssayAction{
 		long totalElements = page.getTotalElements();
 		long totalPages = totalElements/pageSize+ (totalElements%pageSize==0?0:1);
 		Iterator<Essay> itera = content.iterator();
-		while(itera.hasNext()){
-			Essay word_i = itera.next();
-			word_i.setLeaveWords(null);
-			//word_i.setwKind(null);
-		}
 		info.put("content", content);
 		info.put("totalPages", totalPages);
 		info.put("totalElements", totalElements);
@@ -198,19 +162,19 @@ public class EssayAction{
 	
 	
 	//need fixed
-	@ResponseBody
-	@RequestMapping(value="/verifyTitle")
-	public Boolean verifyTitle(@RequestParam("id")String id,@RequestParam("title")String title,@RequestParam("kindName")String kindName,@RequestParam("aboutWhatName")String  aboutWhatName,@RequestParam("webDoWhat")String webDoWhat){
-		if(id==null){
-			return !this.essayService.hasWordByTitle(title, kindName, aboutWhatName);
-		}else{
-			Essay word = essayService.getItbyId(id);
-			if(word.getTitle()!=null){
-				return word.getTitle().equals(title);
-			}
-		}
-		return false;
-	}
+//	@ResponseBody
+//	@RequestMapping(value="/verifyTitle")
+//	public Boolean verifyTitle(@RequestParam("id")String id,@RequestParam("title")String title,@RequestParam("kindName")String kindName,@RequestParam("aboutWhatName")String  aboutWhatName,@RequestParam("webDoWhat")String webDoWhat){
+//		if(id==null){
+//			return !this.essayService.hasWordByTitle(title, kindName, aboutWhatName);
+//		}else{
+//			Essay word = essayService.getItbyId(id);
+//			if(word.getTitle()!=null){
+//				return word.getTitle().equals(title);
+//			}
+//		}
+//		return false;
+//	}
 	//need fixed
 //	@ResponseBody
 //	@RequestMapping("/update")

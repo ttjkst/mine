@@ -1,24 +1,14 @@
 package com.ttjkst.service.impl;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.util.Date;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.ttjkst.BootApplication;
-import com.ttjkst.bean.AboutWhat;
-import com.ttjkst.bean.Kind;
 import com.ttjkst.bean.Essay;
 import com.ttjkst.service.IEssayService;
-import com.ttjkst.service.exception.ServiceException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes=BootApplication.class)

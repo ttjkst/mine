@@ -8,12 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -28,8 +22,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ttjkst.bean.AboutWhat;
-import com.ttjkst.bean.Kind;
 import com.ttjkst.bean.Essay;
 import com.ttjkst.dao.EssayDAO;
 import com.ttjkst.elastic.ElasticDao;
@@ -65,12 +57,6 @@ public class EssayService implements IEssayService{
 	   dao.delete(id);
 	}
 
-	// need fixed question search mysql or elastic ?
-	public boolean hasWordByTitle(String title, String kindName,
-			String aboutWhatName) {
-		Integer result = 0;
-		return result.equals(0)?false:true;
-	}
 
 	//need fixed
 	@Transactional(readOnly=true)
@@ -118,25 +104,6 @@ public class EssayService implements IEssayService{
 				
 		dao.save(word);
 		return word;
-	}
-	//need fixed
-	public Page<Essay> findItByReadTimes(final String aboutWhatName, int size) {
-		Pageable pageable = new PageRequest(0, size);
-		Specification<Essay> specification = new Specification<Essay>() {
-			
-			public Predicate toPredicate(Root<Essay> root, CriteriaQuery<?> query,
-					CriteriaBuilder cb) {
-				if(aboutWhatName!=null&&!aboutWhatName.isEmpty()){
-					Path<Kind> kindPath = root.get("wKind");
-					Path<AboutWhat> abPath = kindPath.get("aboutwhat");
-					Expression<String> nameEx = abPath.get("name");
-					return cb.equal(nameEx, aboutWhatName);
-				}else{
-					throw new IllegalArgumentException("Argument 'aboutWhatName' must not be null!");
-				}
-			}
-		};
-		return dao.findAll(specification, pageable);
 	}
 
 	
